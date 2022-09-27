@@ -6,13 +6,23 @@ This repository contains files and data supporting the article "Manufacturing an
 
 ## File Description
 
-SageMath script that can be used to reproduce the formula for temperature and root-mean-square velocity 
+Variable Definitions
+* $t$ = time
+* $C$ = composition
+* $T$ = temperature
+* $H$ = internal heating rate
+* $v_{RMS}$ = root-mean-square velocity
+* $E$ = entrainment
 
-Maple script for symbolic calculation of internal heating ($H$)
+SageMath script that can be used to:
+* reproduce the formulas for $T$ and $v_{RMS}$
+* generate plot data for $C$ and $T$
 
-MATLAB script for generating data used in internal heating and entrainment plots
+Maple script for symbolic calculation of $H$
 
-Entrainment datafile
+MATLAB script for generating data used in $H$ and $E$
+
+Data files for $E$ corresponding to the "Sample Results" section
 
 Files containing formulas for $H$ (6 files total)
 * Fortran
