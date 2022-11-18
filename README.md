@@ -4,7 +4,10 @@
 1. [Background](#background)
 2. [Variable Definitions](#variable-definitions)
 3. [File Description](#file-description)
-4. [Legal](#legal)
+4. [How to Use Fortran Routines](#how-to-use-fortran-routines)
+    1. [Standalone](#standalone)
+    2. [With a Convection Code](#with-a-convection-code)
+5. [Legal](#legal)
 
 ## Background
 
@@ -35,11 +38,13 @@ This repository contains files and data supporting the article "Manufacturing an
 * Data files for $E$ corresponding to the "Sample Results" section
 * Computed using [Fortran](/Fortran) routines
 
-## How to Use Fortran routines
+## How to Use Fortran Routines
 
 ### Standalone
+* Calculate $C$, $T$, $H$, $v_{RMS}$, and $E$.
 
 ### With a Convection Code
+* Calculate $H(x,z,t)$ to be used in the advection--diffusion equation for $T$. 
 
 ## Legal
 
