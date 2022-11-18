@@ -1,4 +1,6 @@
 # exact-thermochem-solution
+
+## Contents
 1. [Background](#background)
 2. [Variable Definitions](#variable-definitions)
 3. [File Description](#file-description)
