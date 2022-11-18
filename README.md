@@ -31,9 +31,15 @@ This repository contains files and data supporting the article "Manufacturing an
 [Fortran](/Fortran)
 * Fortran code that can calculate $C$, $T$, $H$, $v_{RMS}$, and $E$.
 
-Data
+[Data](/Data)
 * Data files for $E$ corresponding to the "Sample Results" section
-* Computed using Fortran routines
+* Computed using [Fortran](/Fortran) routines
+
+## How to Use Fortran routines
+
+### Standalone
+
+### With a Convection Code
 
 ## Legal
 
