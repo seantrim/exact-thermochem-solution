@@ -31,17 +31,22 @@ This repository contains files and data supporting the article "Manufacturing an
 
 ### [Maple](/Maple)
 * Maple script for symbolic calculation of $H$
+[maple_analytic_solution.mw](/Maple/maple_analytic_solution.mw)
+
+[foo.m](/Maple/foo.m)
+
+[Fortran_code_generation.mw](/Maple/Fortran_code_generation.mw)
 
 ### [Fortran](/Fortran)
 * Fortran code that can calculate $C$, $T$, $H$, $v_{RMS}$, and $E$.
 
 ### [Data](/Data)
 [entrainment_sample_1_401x401.dat](/Data/entrainment_sample_1_401x401.dat)
-* $E$ data for temporally periodic case in "Sample Results" section 
+* $E$ time series data for temporally periodic case in "Sample Results" section 
 * Computed using [Fortran](/Fortran) routines
 
 [entrainment_sample_2_751x501.dat](/Data/entrainment_sample_2_751x501.dat)
-* $E$ data for approaching steady state case in "Sample Results" section
+* $E$ time series data for approaching steady state case in "Sample Results" section
 * Computed using [Fortran](/Fortran) routines
 
 ## How to Use Fortran Routines
