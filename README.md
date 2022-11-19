@@ -99,7 +99,7 @@ This repository contains files and data supporting the article "Manufacturing an
 ## How to Use Fortran Routines
 
 ### Standalone
-Can be used to generate data for $C$, $T$, $H$, $v_{RMS}$, and $E$ from the exact solution
+Can be used to generate data for $C$, $T$, $H$, $v_{RMS}$, and $E$ from the exact solution.
 
 1. Specify $f(t)$, $df/dt$, $d^2 f/dt^2$ and $\int f dt$ in [input_functions.f90](/Fortran/input_functions.f90)
     * Both cases from the "Sample Results" section are shown as examples in [input_functions.f90](/Fortran/input_functions.f90)
@@ -119,7 +119,24 @@ Can be used to generate data for $C$, $T$, $H$, $v_{RMS}$, and $E$ from the exac
     * Modifying the examples in [exact_solution_main.f90](/Fortran/exact_solution_main.f90) can be done to customize the output
 
 ### With a Convection Code
-* Calculate $H(x,z,t)$ to be used in the advection--diffusion equation for $T$. 
+Can be used to calculate $H(x,z,t)$ from within a convection code. These instructions presume that the convection code is written in Fortran. However, options for other programming languages are under development. The following steps are guidelines only. The precise procedure may depend on the particular convection code used.
+
+1. Specify $f(t)$, $df/dt$, $d^2 f/dt^2$ and $\int f dt$ in [input_functions.f90](/Fortran/input_functions.f90)
+    * Both cases from the "Sample Results" section are shown as examples in [input_functions.f90](/Fortran/input_functions.f90)
+2. Insert calls to the subroutine `compute_H_func`, which returns the value of $H(x,z,t)$, within the source of the convection code where necessary
+    * It is presumed that the convection code can accept an internal heating rate the varies in space and time
+    * An example of how to call `compute_H_func` is shown in [exact_solution_main.f90](/Fortran/exact_solution_main.f90)
+        * The H value is returned in the rightmost argument  
+4. Link all f90 files from the [Fortran](/Fortran) folder except [exact_solution_main.f90](/Fortran/exact_solution_main.f90) to the source for the convection code
+    * Example: `gfortran -flto -O3 convection_code_source.f90 exact_solution_routines.f90 elliptic.f90 H_helper_routines.f90 xelbdj2_all_routines.f90 xgscd_routines.f90 H_func.f90 input_functions.f90 -o convection_code`
+    * In the above example, the source for the convection code is `convection_code_source.f90` and the resulting executable is `convection_code`
+        * Modify these names as needed
+    * gfortran 11.3.0 or later is recommended
+    * Other compilers (and compiler options) may be possible but results should be tested
+    * Warning: Duplicate variable/routine names may occur
+        * Resolve any related compiler errors
+        * Verify that the arguments of `compute_H_func` correspond to the correct values and data types 
+5. Run the convection code execuatable as usual
 
 ## Legal
 
