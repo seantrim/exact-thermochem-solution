@@ -99,9 +99,24 @@ This repository contains files and data supporting the article "Manufacturing an
 ## How to Use Fortran Routines
 
 ### Standalone
-* Calculate $C$, $T$, $H$, $v_{RMS}$, and $E$.
-* gfortran 11.3.0 or later is recommended
-* Other compilers may be possible but results should be tested
+Can be used to generate data for $C$, $T$, $H$, $v_{RMS}$, and $E$ from the exact solution
+
+1. Specify $f(t)$, $df/dt$, $d^2 f/dt^2$ and $\int f dt$ in [input_functions.f90](/Fortran/input_functions.f90)
+    * Both cases from the "Sample Results" section are shown as examples in [input_functions.f90](/Fortran/input_functions.f90)
+2. Specify physical parameters (e.g., aspect ratio, Rayleigh numbers, etc.) in [exact_solution_main.f90](/Fortran/exact_solution_main.f90)
+    * Search for "!!Input Parameters" in the comments
+    * Both cases from the "Sample Results" section are shown as examples
+3. Compile the code by running [compile_script](/Fortran/compile_script) from the command line.
+    * Linux: `$ source compile_script`
+        * This produces the executable [exact_solution_code](/Fortran/exact_solution_code)
+    * gfortran 11.3.0 or later is recommended
+    * Other compilers may be possible but results should be tested
+4. Run [exact_solution_code](/Fortran/exact_solution_code) from the command line
+    * Linux: `$ ./exact_solution_code`
+    * This will produce data for snapshots of $C$, $T$, and $H$
+    * This will also produce data for a time series of $E$
+    * Example routine calls for several quantities are shown in [exact_solution_main.f90](/Fortran/exact_solution_main.f90)
+    * Modifying the examples in [exact_solution_main.f90](/Fortran/exact_solution_main.f90) can be done to customize the output
 
 ### With a Convection Code
 * Calculate $H(x,z,t)$ to be used in the advection--diffusion equation for $T$. 
