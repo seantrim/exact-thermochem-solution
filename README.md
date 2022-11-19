@@ -37,6 +37,8 @@ This repository contains files and data supporting the article "Manufacturing an
 [Data](/Data)
 * Data files for $E$ corresponding to the "Sample Results" section
 * Computed using [Fortran](/Fortran) routines
+    * [entrainment_sample_1_401x401.dat](/Data/entrainment_sample_1_401x401.dat)
+    * [entrainment_sample_2_751x501.dat](/Data/entrainment_sample_2_751x501.dat)
 
 ## How to Use Fortran Routines
 
