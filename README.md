@@ -8,7 +8,7 @@
     2. [Maple](#maple)
     3. [Fortran](#fortran)
     4. [Data](#data)
-4. [How to Use Fortran Routines](#how-to-use-fortran-routines)
+4. [How to Use the Fortran Routines](#how-to-use-the-fortran-routines)
     1. [Standalone](#standalone)
     2. [With a Convection Code](#with-a-convection-code)
 5. [Legal](#legal)
