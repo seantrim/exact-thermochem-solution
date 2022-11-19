@@ -23,22 +23,26 @@ This repository contains files and data supporting the article "Manufacturing an
 
 ## File Description
 
-[exact_solution.sage](/exact_solution.sage)
+### [SageMath](/SageMath)
+[exact_solution.sage](/SageMath/exact_solution.sage)
 * SageMath script that can be used to:
     * symbolically compute the formulas for $T$ and $v_{RMS}$
     * generate plot data for $C$ and $T$
 
-[Maple](/Maple)
+### [Maple](/Maple)
 * Maple script for symbolic calculation of $H$
 
-[Fortran](/Fortran)
+### [Fortran](/Fortran)
 * Fortran code that can calculate $C$, $T$, $H$, $v_{RMS}$, and $E$.
 
-[Data](/Data)
-* Data files for $E$ corresponding to the "Sample Results" section
+### [Data](/Data)
+[entrainment_sample_1_401x401.dat](/Data/entrainment_sample_1_401x401.dat)
+* $E$ data for temporally periodic case in "Sample Results" section 
 * Computed using [Fortran](/Fortran) routines
-    * [entrainment_sample_1_401x401.dat](/Data/entrainment_sample_1_401x401.dat)
-    * [entrainment_sample_2_751x501.dat](/Data/entrainment_sample_2_751x501.dat)
+
+[entrainment_sample_2_751x501.dat](/Data/entrainment_sample_2_751x501.dat)
+* $E$ data for approaching steady state case in "Sample Results" section
+* Computed using [Fortran](/Fortran) routines
 
 ## How to Use Fortran Routines
 
