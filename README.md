@@ -30,12 +30,18 @@ This repository contains files and data supporting the article "Manufacturing an
     * generate plot data for $C$ and $T$
 
 ### [Maple](/Maple)
-* Maple script for symbolic calculation of $H$
 [maple_analytic_solution.mw](/Maple/maple_analytic_solution.mw)
+* Maple worksheet for symbolic computation of $H$
+* Results stored in [foo.m](/Maple/foo.m) 
 
 [foo.m](/Maple/foo.m)
+* Results from running [maple_analytic_solution.mw](/Maple/maple_analytic_solution.mw)
+* Once loaded into a Maple worksheet, functions such as $C(x,z,t)$, $T(x,z,t)$, and $H(x,a,t)$ become available
+    * Saves time compared to rerunning [maple_analytic_solution.mw](/Maple/maple_analytic_solution.mw) 
 
 [Fortran_code_generation.mw](/Maple/Fortran_code_generation.mw)
+* Maple worksheet for translating Maple's $H$ formula into Fortran 77 code
+* The result was adapted to free form Fortran for use in H_func.f90
 
 ### [Fortran](/Fortran)
 * Fortran code that can calculate $C$, $T$, $H$, $v_{RMS}$, and $E$.
