@@ -41,10 +41,30 @@ This repository contains files and data supporting the article "Manufacturing an
 
 [Fortran_code_generation.mw](/Maple/Fortran_code_generation.mw)
 * Maple worksheet for translating Maple's $H$ formula into Fortran 77 code
-* The result was adapted to free form Fortran for use in H_func.f90
+* The result was adapted to free form Fortran for use in [H_func.f90](/Fortran/H_func.f90)
 
 ### [Fortran](/Fortran)
 * Fortran code that can calculate $C$, $T$, $H$, $v_{RMS}$, and $E$.
+
+[exact_solution_main.f90](/Fortran/exact_solution_main.f90)
+
+[exact_solution_routines.f90](/Fortran/exact_solution_routines.f90)
+
+[H_func.f90](/Fortran/H_func.f90)
+
+[H_helper_routines.f90](/Fortran/H_helper_routines.f90)
+
+[input_functions.f90](/Fortran/input_functions.f90)
+
+[elliptic.f90](/Fortran/elliptic.f90)
+
+[xelbdj2_all_routines.f90](/Fortran/xelbdj2_all_routines.f90)
+
+[xgscd_routines.f90](/Fortran/xgscd_routines.f90)
+
+[compile_script](/Fortran/compile_script)
+
+[exact_solution_code](/Fortran/exact_solution_code)
 
 ### [Data](/Data)
 [entrainment_sample_1_401x401.dat](/Data/entrainment_sample_1_401x401.dat)
