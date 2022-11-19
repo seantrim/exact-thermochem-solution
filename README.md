@@ -96,7 +96,7 @@ This repository contains files and data supporting the article "Manufacturing an
 * $E$ time series data for approaching steady state case in "Sample Results" section
 * Computed using [Fortran](/Fortran) routines
 
-## How to Use Fortran Routines
+## How to Use the Fortran Routines
 
 ### Standalone
 Can be used to generate data for $C$, $T$, $H$, $v_{RMS}$, and $E$ from the exact solution.
