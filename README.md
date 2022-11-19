@@ -24,6 +24,7 @@ This repository contains files and data supporting the article "Manufacturing an
 * $H$ = internal heating rate
 * $v_{RMS}$ = root-mean-square velocity
 * $E$ = entrainment
+* f(t) = time dependence of the stream function
 
 ## File Description
 
@@ -48,27 +49,43 @@ This repository contains files and data supporting the article "Manufacturing an
 * The result was adapted to free form Fortran for use in [H_func.f90](/Fortran/H_func.f90)
 
 ### [Fortran](/Fortran)
-* Fortran code that can calculate $C$, $T$, $H$, $v_{RMS}$, and $E$.
-
 [exact_solution_main.f90](/Fortran/exact_solution_main.f90)
+* Main program for [standalone](#standalone) version of the Fortran routines
 
 [exact_solution_routines.f90](/Fortran/exact_solution_routines.f90)
+* Contains routines for calculating physical quantities including:
+    * $C$, $T$, $H$, $v_{RMS}$, and $E$
 
 [H_func.f90](/Fortran/H_func.f90)
+* Contains routine for evaluating $H(x,z,t)$
 
 [H_helper_routines.f90](/Fortran/H_helper_routines.f90)
+* Contains Fortran equivalents of Maple functions referenced in [H_func.f90](/Fortran/H_func.f90)
 
 [input_functions.f90](/Fortran/input_functions.f90)
+* Contains user defined function $f(t)$, with its integral and derivatives
 
 [elliptic.f90](/Fortran/elliptic.f90)
+* Contains routines that evaluate elliptic integrals and Jacobi elliptic functions for the input parameter ranges needed
+* Input ranges were generalized by combining identities with calls to routines from [xelbdj2_all_routines.f90](/Fortran/xelbdj2_all_routines.f90) and [xgscd_routines.f90](/Fortran/xgscd_routines.f90)
 
 [xelbdj2_all_routines.f90](/Fortran/xelbdj2_all_routines.f90)
+* Contains routines for evaluation of associate incomplete elliptic integrals of first, second, and third kinds
+* Assumes standard input parameter ranges
+* Adapted from routines by Toshio Fukushima (see [Legal](#legal))
 
 [xgscd_routines.f90](/Fortran/xgscd_routines.f90)
+* Contains routines for the evaluation of the Jacobi elliptic functions sn, cn, and dn
+* Assumes standard input parameter ranges
+* Adapted from routines by Toshio Fukushima (see [Legal](#legal))
 
 [compile_script](/Fortran/compile_script)
+* Terminal script for compiling the [standalone](#standalone) version of the Fortran routines using gfortran
 
 [exact_solution_code](/Fortran/exact_solution_code)
+* Sample exexcutable for the [standalone](#standalone) version of the Fortran routines
+* Results from running [compile_script](/Fortran/compile_script) in the terminal using the .f90 files in the [Fortran](/Fortran) folder
+* gfortran 11.3.0 was used  
 
 ### [Data](/Data)
 [entrainment_sample_1_401x401.dat](/Data/entrainment_sample_1_401x401.dat)
@@ -83,6 +100,8 @@ This repository contains files and data supporting the article "Manufacturing an
 
 ### Standalone
 * Calculate $C$, $T$, $H$, $v_{RMS}$, and $E$.
+* gfortran 11.3.0 or later is recommended
+* Other compilers may be possible but results should be tested
 
 ### With a Convection Code
 * Calculate $H(x,z,t)$ to be used in the advection--diffusion equation for $T$. 
@@ -91,6 +110,6 @@ This repository contains files and data supporting the article "Manufacturing an
 
 This repository is subject to the GPLv3 [license](/LICENSE).
 
-The routines contained within xelbdj2_all_routines.f90 and xgscd_routines.f90 are adapted from the routines by Toshio Fukushima available under the CC BY-SA 4.0 license. Original versions of these routines can be found at http://dx.doi.org/10.13140/RG.2.2.27011.66085 and https://www.researchgate.net/publication/233903220_xgscdtxt_Fortran_program_package_to_compute_the_Jacobian_elliptic_functions_snum_cnum_dnum.
+The routines contained within xelbdj2_all_routines.f90 and xgscd_routines.f90 are adapted from routines by Toshio Fukushima available under the CC BY-SA 4.0 license. Original versions of these routines can be found at http://dx.doi.org/10.13140/RG.2.2.27011.66085 and https://www.researchgate.net/publication/233903220_xgscdtxt_Fortran_program_package_to_compute_the_Jacobian_elliptic_functions_snum_cnum_dnum.
 
 Maple is a trademark of Waterloo Maple Inc.
