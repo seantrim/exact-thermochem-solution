@@ -15,7 +15,7 @@
 
 ## Background
 
-This repository contains files and data supporting the article "Manufacturing an exact solution for 2D thermochemical mantle convection models" by S.J. Trim, S.L. Butler, S.S.C. McAdam, and R.J. Spiteri.
+This repository contains files and data supporting the article "Manufacturing an exact solution for 2D thermochemical mantle convection models" by S.J. Trim, S.L. Butler, S.S.C. McAdam, and R.J. Spiteri. Computer algebra scripts for the exact solution are provided in SageMath and Maple. Symbolic computation of the internal heating rate is performed using Maple, which has been translated into Fortran. The Fortran routines can be used to calculate quantities from the exact solution both independently and within an existing convection code.
 
 ## Variable Definitions
 * $t$ = time
@@ -32,7 +32,8 @@ This repository contains files and data supporting the article "Manufacturing an
 [exact_solution.sage](/SageMath/exact_solution.sage)
 * SageMath script that can be used to:
     * symbolically compute the formulas for $T$ and $v_{RMS}$
-    * generate plot data for $C$ and $T$
+    * generate data and plots for $C$ and $T$
+    * note: does not calculate $H$ (see [Maple](/Maple))
 
 ### [Maple](/Maple)
 [maple_analytic_solution.mw](/Maple/maple_analytic_solution.mw)
