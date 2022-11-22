@@ -2,7 +2,6 @@ program exact_solution
 implicit none
 
 real*8, parameter :: pii=3.1415926535897932d0
-real*8 :: piio2,zero !!pi/2 and zero constants
 
 !!variables for elliptic functions and integrals
 real*8 :: m            !!elliptic parameter
@@ -22,8 +21,9 @@ real*8 :: RaT,RaC !!thermal and compositional Rayleigh numbers
 real*8 :: H       !!internal heating rate
 
 !!numerical resolution variables
-integer*4 :: nx,nz !!mesh
+integer*4 :: nx,nz    !!mesh size
 integer*4 :: nt       !!time series data points
+real*8 :: t1,t2       !!initial and final times for time series data
 
 !!arrays
 real*8, allocatable :: C_array(:,:),T_array(:,:),H_array(:,:) !!arrays for C, T, and H fields
@@ -36,16 +36,17 @@ real*8 :: vRMS     !!function for RMS velocity
 !!testing
 complex*16 :: kcomplex,InverseJacobiAM
 
-!!!!!!!!!!useful constants
-zero=0.d0
-piio2=pii/2.d0 !!pii over 2
-!!!!!!!!!!!end useful constants
-
 !!Input Parameters -- note that functions in input_functions.f90 must also be specified
 !lambda=1.0d0; k=35.d0; zI=0.5d0; RaT=1.d5; RaC=1.d5 !!case 1 -- physical parameters
-!nx=151; nz=151 !case 1 -- mesh size
+!nx=151; nz=151   !!case 1 -- mesh size
+t1=0.d0; t2=0.01d0 !!case 1 -- time range for entrainment time series
+nt=11             !!case 1 -- # of data points in the entrainment time series
+
 lambda=1.5d0; k=35.d0; zI=0.2d0; RaT=1.d6; RaC=8.d5 !!case 2 -- physical parameters
-nx=601; nz=401 !case 2 -- mesh size 
+!nx=601; nz=401    !!case 2 -- mesh size 
+nx=301; nz=201    !!case 2 -- mesh size
+t1=0.d0; t2=0.1d0 !!case 2 -- time range for entrainment time series
+nt=11             !!case 2 -- # of data points in the entrainment time series
 !!End Input Parameters
 
 !!!complete elliptic integrals
@@ -76,7 +77,7 @@ write(*,*) ""
 !!!!!!!!!!!!!!!!!!!!!!!!!!!End Jacobi elliptic functions
 
 !!Functions for Mantle Convection
-x=0.05d0; z=0.1d00; t=0.00000d0;
+x=0.05d0; z=0.1d00; t=0.00000d0; !!sample coordinate and time for function evaluations
 call compute_z0(x,z,t,lambda,z0)
 call compute_H_func(x,z,t,lambda,k,zI,RaT,RaC,H)
 write(*,*) "Functions for Mantle Convection:"
@@ -91,8 +92,6 @@ write(*,*) " "
 !!End Functions for Mantle Convection
 
 !!!!!!H array test -- use parameters from H test above
-!nx=151; nz=151 !problem 1
-nx=601; nz=401 !problem 2
 allocate(H_array(1:nx,1:nz),T_array(1:nx,1:nz),C_array(1:nx,1:nz))
 call compute_array('H',t,lambda,k,zI,RaT,RaC,nx,nz,H_array)
 call create_datafile(lambda,nx,nz,H_array,"H_data.dat")
@@ -102,24 +101,22 @@ call compute_array('C',t,lambda,k,zI,RaT,RaC,nx,nz,C_array)
 call create_datafile(lambda,nx,nz,C_array,"C_data.dat")
 !!!!!!End H array test
 
-
 !!!!Entrainment calculation
-nx=751; nz=501 !!resolution for midpoint integration rule
-nt=11         !!# of data points in the time series
-!zR=zI !!reference height
-!call compute_entrainment(0.d0,0.01d0,nt,zR,lambda,k,zI,RaT,RaC,nx,nz,"entrainment_sample_1_401x401.dat")
+zR=zI !!reference height
+call compute_entrainment(t1,t2,nt,zR,lambda,k,zI,RaT,RaC,nx,nz,"entrainment.dat")
 !!!!end Entrainment calculations
 
 !!For testing -- 
-write(*,*) "Testing: verify accuracy with Maple"
-u=(3.0892327760299629d0,0.d0); kcomplex=(19.107322609297285d0,0.d0)
-write(*,*) "u,kcomplex=",u,kcomplex
-write(*,*) "InverseJacobiAM(u,kcomplex)=",InverseJacobiAM(u,kcomplex)
-m=kcomplex%RE**2
-call incomplete_elliptic_integrals(u%RE,m,Fi,Ei)
-write(*,*) "Fi=",Fi
-write(*,*) "Ei=",Ei
-write(*,*) ""
+!write(*,*) "Testing: verify accuracy with Maple"
+!u=(3.0892327760299629d0,0.d0); kcomplex=(19.107322609297285d0,0.d0)
+!write(*,*) "u,kcomplex=",u,kcomplex
+!write(*,*) "InverseJacobiAM(u,kcomplex)=",InverseJacobiAM(u,kcomplex)
+!write(*,*) "Maple value = 0.082265508499299800 - 0.45413520599782981 I"
+!m=kcomplex%RE**2
+!call incomplete_elliptic_integrals(u%RE,m,Fi,Ei)
+!write(*,*) "Fi=",Fi
+!write(*,*) "Ei=",Ei
+!write(*,*) ""
 
 end program exact_solution
 
