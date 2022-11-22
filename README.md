@@ -24,7 +24,7 @@ This repository contains files and data supporting the article "Manufacturing an
 * $H$ = internal heating rate
 * $v_{RMS}$ = root-mean-square velocity
 * $E$ = entrainment
-* f(t) = time dependence of the stream function
+* $f(t)$ = time dependence of the stream function
 
 ## File Description
 
