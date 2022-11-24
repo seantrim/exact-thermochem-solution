@@ -308,3 +308,48 @@ else !!0<=phi<pi/2
  end if
 end if
 end subroutine incomplete_elliptic_integrals
+
+subroutine incomplete_elliptic_integral_trapezoidal_rule(phi,k,Ntheta)
+!!compute the incomplete elliptic integral of the first kind via the trapezoidal rule in quad precision
+!!used to compute reference values by brute force that may be used for testing
+!!not intended to be used in production runs
+implicit none
+
+!!input
+real*16 :: phi !!Jacobi amplitude 
+real*16 :: k !!elliptic modulus
+integer*4 :: Ntheta !!# of mesh points
+
+!!output
+complex*32 :: F !!elliptic integral of the first kind
+
+!!internal variable
+real*16 :: theta !!variable of integration
+real*16 :: dtheta !!mesh spacing
+integer*4 :: Nindex !!index counter
+
+dtheta=phi/real(Ntheta-1,16)
+
+F=(0.q0,0.q0)
+theta=0.q0
+
+do Nindex=1,Ntheta-1
+ theta=real(Nindex-1,16)*dtheta
+ !F=F+dtheta*(integrand(theta,k)+integrand(theta+dtheta,k))/2.q0
+ !F=F+dtheta*(integrand(theta,k)+4.q0*integrand(theta+dtheta/2.q0,k)+integrand(theta+dtheta,k))/6.q0
+ F=F+dtheta*(integrand(theta,k)+3.q0*integrand(theta+dtheta/3.q0,k)+3.q0*integrand(theta+dtheta*2.q0/3.q0,k)&
+            &+integrand(theta+dtheta,k))/8.d0
+ !write(*,*) theta,theta+dtheta
+ !write(*,*) integrand(theta,m),integrand(theta+dtheta,m)
+end do
+write(*,*) "IEITR: F",F
+
+contains
+
+ complex*32 function integrand(theta,k)
+ implicit none
+ real*16 :: theta,k
+  integrand=(1.q0,0.q0)/sqrt(complex(1.q0-(k*sin(theta))**2,0.q0))
+ end function integrand
+
+end subroutine incomplete_elliptic_integral_trapezoidal_rule

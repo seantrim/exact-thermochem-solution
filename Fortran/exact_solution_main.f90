@@ -39,11 +39,10 @@ complex*16 :: kcomplex,InverseJacobiAM
 !!Input Parameters -- note that functions in input_functions.f90 must also be specified
 !lambda=1.0d0; k=35.d0; zI=0.5d0; RaT=1.d5; RaC=1.d5 !!case 1 -- physical parameters
 !nx=151; nz=151   !!case 1 -- mesh size
-t1=0.d0; t2=0.01d0 !!case 1 -- time range for entrainment time series
-nt=11             !!case 1 -- # of data points in the entrainment time series
+!t1=0.d0; t2=0.01d0 !!case 1 -- time range for entrainment time series
+!nt=11             !!case 1 -- # of data points in the entrainment time series
 
 lambda=1.5d0; k=35.d0; zI=0.2d0; RaT=1.d6; RaC=8.d5 !!case 2 -- physical parameters
-!nx=601; nz=401    !!case 2 -- mesh size 
 nx=301; nz=201    !!case 2 -- mesh size
 t1=0.d0; t2=0.1d0 !!case 2 -- time range for entrainment time series
 nt=11             !!case 2 -- # of data points in the entrainment time series
@@ -106,7 +105,7 @@ zR=zI !!reference height
 call compute_entrainment(t1,t2,nt,zR,lambda,k,zI,RaT,RaC,nx,nz,"entrainment.dat")
 !!!!end Entrainment calculations
 
-!!For testing -- 
+!!Extra developer testing -- 
 !write(*,*) "Testing: verify accuracy with Maple"
 !u=(3.0892327760299629d0,0.d0); kcomplex=(19.107322609297285d0,0.d0)
 !write(*,*) "u,kcomplex=",u,kcomplex
@@ -117,6 +116,13 @@ call compute_entrainment(t1,t2,nt,zR,lambda,k,zI,RaT,RaC,nx,nz,"entrainment.dat"
 !write(*,*) "Fi=",Fi
 !write(*,*) "Ei=",Ei
 !write(*,*) ""
+!u=(3.0892327760299629d0,0.d0); kcomplex=(19.107322609297285d0,0.d0)
+!write(*,*) "u,kcomplex=",u,kcomplex
+!write(*,*) "InverseJacobiAM(u,kcomplex)=",InverseJacobiAM(u,kcomplex)
+!write(*,*) ""
+!call incomplete_elliptic_integral_trapezoidal_rule(3.0892327760299629q0,19.107322609297285q0,100000001)
+!call incomplete_elliptic_integral_trapezoidal_rule(0.5q0,0.5q0,1000001)
+!write(*,*) "Maple: 0.50508872757864808"
 
 end program exact_solution
 
