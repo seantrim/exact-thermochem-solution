@@ -35,6 +35,7 @@ real*8 :: vRMS     !!function for RMS velocity
 
 !!testing
 complex*16 :: kcomplex,InverseJacobiAM
+real*8 :: tstart,tfinish
 
 !!Input Parameters -- note that functions in input_functions.f90 must also be specified
 !lambda=1.0d0; k=35.d0; zI=0.5d0; RaT=1.d5; RaC=1.d5 !!case 1 -- physical parameters
@@ -43,7 +44,8 @@ complex*16 :: kcomplex,InverseJacobiAM
 !nt=11             !!case 1 -- # of data points in the entrainment time series
 
 lambda=1.5d0; k=35.d0; zI=0.2d0; RaT=1.d6; RaC=8.d5 !!case 2 -- physical parameters
-nx=301; nz=201    !!case 2 -- mesh size
+!nx=301; nz=201    !!case 2 -- mesh size
+nx=601; nz=401    !!case 2 -- mesh size
 t1=0.d0; t2=0.1d0 !!case 2 -- time range for entrainment time series
 nt=11             !!case 2 -- # of data points in the entrainment time series
 !!End Input Parameters
@@ -76,7 +78,7 @@ write(*,*) ""
 !!!!!!!!!!!!!!!!!!!!!!!!!!!End Jacobi elliptic functions
 
 !!Functions for Mantle Convection
-x=0.05d0; z=0.1d00; t=0.00000d0; !!sample coordinate and time for function evaluations
+x=0.2d0; z=0.2d0; t=0.01d0 !!sample coordinate and time for function evaluations
 call compute_z0(x,z,t,lambda,z0)
 call compute_H_func(x,z,t,lambda,k,zI,RaT,RaC,H)
 write(*,*) "Functions for Mantle Convection:"
@@ -90,39 +92,29 @@ write(*,*) "H=",H
 write(*,*) " "
 !!End Functions for Mantle Convection
 
-!!!!!!H array test -- use parameters from H test above
+!!!!!!Compute H, T, and C arrays and print to file
 allocate(H_array(1:nx,1:nz),T_array(1:nx,1:nz),C_array(1:nx,1:nz))
+call cpu_time(tstart)
 call compute_array('H',t,lambda,k,zI,RaT,RaC,nx,nz,H_array)
+call cpu_time(tfinish)
 call create_datafile(lambda,nx,nz,H_array,"H_data.dat")
 call compute_array('T',t,lambda,k,zI,RaT,RaC,nx,nz,T_array)
 call create_datafile(lambda,nx,nz,T_array,"T_data.dat")
 call compute_array('C',t,lambda,k,zI,RaT,RaC,nx,nz,C_array)
 call create_datafile(lambda,nx,nz,C_array,"C_data.dat")
-!!!!!!End H array test
+write(*,*) "H array compute time=",tfinish-tstart
+write(*,*) " "
+stop !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TAKE OUT
+!!!!!!End Compute H, T, and C arrays and print to file
 
 !!!!Entrainment calculation
 zR=zI !!reference height
+call cpu_time(tstart)
 call compute_entrainment(t1,t2,nt,zR,lambda,k,zI,RaT,RaC,nx,nz,"entrainment.dat")
+call cpu_time(tfinish)
+write(*,*) "Entrainment compute time=",tfinish-tstart
+write(*,*) " "
 !!!!end Entrainment calculations
-
-!!Extra developer testing -- 
-!write(*,*) "Testing: verify accuracy with Maple"
-!u=(3.0892327760299629d0,0.d0); kcomplex=(19.107322609297285d0,0.d0)
-!write(*,*) "u,kcomplex=",u,kcomplex
-!write(*,*) "InverseJacobiAM(u,kcomplex)=",InverseJacobiAM(u,kcomplex)
-!write(*,*) "Maple value = 0.082265508499299800 - 0.45413520599782981 I"
-!m=kcomplex%RE**2
-!call incomplete_elliptic_integrals(u%RE,m,Fi,Ei)
-!write(*,*) "Fi=",Fi
-!write(*,*) "Ei=",Ei
-!write(*,*) ""
-!u=(3.0892327760299629d0,0.d0); kcomplex=(19.107322609297285d0,0.d0)
-!write(*,*) "u,kcomplex=",u,kcomplex
-!write(*,*) "InverseJacobiAM(u,kcomplex)=",InverseJacobiAM(u,kcomplex)
-!write(*,*) ""
-!call incomplete_elliptic_integral_trapezoidal_rule(3.0892327760299629q0,19.107322609297285q0,100000001)
-!call incomplete_elliptic_integral_trapezoidal_rule(0.5q0,0.5q0,1000001)
-!write(*,*) "Maple: 0.50508872757864808"
 
 end program exact_solution
 

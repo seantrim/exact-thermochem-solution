@@ -298,7 +298,10 @@ else !!0<=phi<pi/2
    call incomplete_elliptic_integrals_standard_input_range(amp,n,mrc_qp,F_temp,E_temp,P_temp)
    F=complex(Fc_temp,-F_temp)/k
    !E=complex(m*Ec_temp+mc*Fc_temp,-F_temp+m*E_temp+(mc*sin_amp*cos(amp))/sqrt(1.d0-mrc*sin_amp**2.d0))/k
-   E=complex(m*Ec_temp+mc*Fc_temp,-F_temp+m*E_temp+real((mc_qp*sin_amp_qp*cos(amp_qp))/sqrt(1.q0-mrc_qp*sin_amp_qp**2),8))/k
+   !E=complex(m*Ec_temp+mc*Fc_temp,-F_temp+m*E_temp+real((mc_qp*sin_amp_qp*cos(amp_qp))/sqrt(1.q0-mrc_qp*sin_amp_qp**2),8))/k
+   !!mc_qp may not be correct at this point -- therefore we have the correction that follows
+   E=complex(m*Ec_temp+mc*Fc_temp,&
+     &-F_temp+m*E_temp+real(((1.q0-m)*sin_amp_qp*cos(amp_qp))/sqrt(1.q0-mrc_qp*sin_amp_qp**2),8))/k
    !E=complex(m*Ec_temp+(1.d0-m)*Fc_temp,-F_temp+m*E_temp+(mc*sin_amp*cos(amp))/sqrt(1.d0-mrc*sin_amp**2.d0))/k
   end if
  else !!standard input ranges

@@ -84,19 +84,25 @@ complex*16 :: t552,t554,t564,t567,t586,t609,t616,t638,t640,t671
       t25 = t24 * t23                 !!1/D
 !write(*,*) "H t14,t25=",t14,t25
       t26 = InverseJacobiAM(t14, t25) !!F(pi*z|1/D^2)
-!write(*,*) "H t26=",t26
+!write(*,*) "H IJAM t26=",t26
       t28 = (-x + lambda / 0.2D1)
+!write(*,*) "H t28=",t28
       t29 = Heaviside(t28)
+!write(*,*) "H Heaviside t29=",t29
       t31 = 2 * t29 - 1
       t32 = (0, -1) * t31      
       t34 = t15 * t22                 !!D
       t35 = F(t)
+!write(*,*) "H F(t)=",F(t)
+!write(*,*) "H dFdt(t)=",dFdt(t)
+!write(*,*) "H d2Fdt2(t)=",d2Fdt2(t)
+!write(*,*) "H d3Fdt3(t)=",d3Fdt3(t)
       t36 = t35 * t11
       t37 = t36 * t34
       t39 = t37 * t1 * t32 + t26      !!eq. 27
 !write(*,*) "H t37*t1*t32,t26=",t37*t1*t32,t26
-      t40 = JacobiCN(t39, t25)
-!write(*,*) "H cn t40=",t40
+      call compute_JacobiSN_CN_DN(t39,t25,t59,t40,t58) !!SJT: avoid repeated computations
+      !t40 = JacobiCN(t39, t25) !!OG
       t41 = 0.31415926535897932D1 / 2 + (0, 1) * log(sqrt(1 - t40 ** 2&
      &) + (0, 1) * t40)
       t46 = exp(-2 * (-t41 * t21 + zI) * k)
@@ -106,8 +112,12 @@ complex*16 :: t552,t554,t564,t567,t586,t609,t616,t638,t640,t671
       t54 = (0, 2) * t22 * t31 * k * 0.31415926535897932D1 * t49 * RaC
       t55 = t11 * t15
       t56 = dFdt(t)
-      t58 = JacobiDN(t39, t25)
-      t59 = JacobiSN(t39, t25)
+      !t58 = JacobiDN(t39, t25) !!OG
+      !t59 = JacobiSN(t39, t25) !!OG
+!write(*,*) "H t39,t25=",t39,t25
+!write(*,*) "H sn t59=",t59
+!write(*,*) "H cn t40=",t40
+!write(*,*) "H dn t58=",t58
       t60 = t59 * t58
       t61 = t40 ** 2
       t62 = -t61 + 1
@@ -131,10 +141,14 @@ complex*16 :: t552,t554,t564,t567,t586,t609,t616,t638,t640,t671
       t91 = t13 * t11
 !write(*,*) "H t26,t25=",t26,t25
       t92 = JacobiZeta(t26, t25)
-!write(*,*) "H t92=",t92
-      t93 = EllipticE(t25)
+!write(*,*) "H JZ t92=",t92
+      call compute_EllipticK_EllipticE(t25,t95,t93) !!SJT: avoid repeated computations
+      !t93 = EllipticE(t25) !!OG
       t94 = t26 * t93
-      t95 = EllipticK(t25)
+      !t95 = EllipticK(t25) !!OG
+!write(*,*) "H t25=",t25
+!write(*,*) "H EK t95=",t95
+!write(*,*) "H EE t93=",t93
       t96 = 0.1D1 / t95
       t98 = t96 * t94 + t92
       t99 = t84 * t98
@@ -170,7 +184,7 @@ complex*16 :: t552,t554,t564,t567,t586,t609,t616,t638,t640,t671
       t147 = t140 * t15
 !write(*,*) "H t39,t25=",t39,t25
       t148 = JacobiZeta(t39, t25)
-!write(*,*) "H t148=",t148
+!write(*,*) "H  JZ t148=",t148
       t149 = t93 * t39
       t151 = t96 * t149 + t148
       t152 = t151 * t147
