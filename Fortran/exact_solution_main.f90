@@ -44,8 +44,7 @@ real*8 :: tstart,tfinish
 !nt=11             !!case 1 -- # of data points in the entrainment time series
 
 lambda=1.5d0; k=35.d0; zI=0.2d0; RaT=1.d6; RaC=8.d5 !!case 2 -- physical parameters
-!nx=301; nz=201    !!case 2 -- mesh size
-nx=601; nz=401    !!case 2 -- mesh size
+nx=301; nz=201    !!case 2 -- mesh size
 t1=0.d0; t2=0.1d0 !!case 2 -- time range for entrainment time series
 nt=11             !!case 2 -- # of data points in the entrainment time series
 !!End Input Parameters
@@ -104,7 +103,6 @@ call compute_array('C',t,lambda,k,zI,RaT,RaC,nx,nz,C_array)
 call create_datafile(lambda,nx,nz,C_array,"C_data.dat")
 write(*,*) "H array compute time=",tfinish-tstart
 write(*,*) " "
-stop !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TAKE OUT
 !!!!!!End Compute H, T, and C arrays and print to file
 
 !!!!Entrainment calculation
