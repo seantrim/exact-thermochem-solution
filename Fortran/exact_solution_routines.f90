@@ -132,7 +132,7 @@ do kint=1,nz
  z=max(min(dz*real(kint-1,8),1.d0),0.d0)
  do iint=1,nx
   x=max(min(dx*real(iint-1,8),lambda),0.d0)
-  write(666,'(3(g16.9))') x,z,array(iint,kint)
+  write(666,'(3(g17.9))') x,z,array(iint,kint)
  end do
 end do
 
