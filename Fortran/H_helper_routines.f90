@@ -1,3 +1,23 @@
+real*8 function csc(theta)
+!!cosecant function
+implicit none
+
+!!input
+real*8 :: theta
+
+csc=1.d0/sin(theta)
+end function csc
+
+real*8 function cot(theta)
+!!cotangent function -- arccot function in exact_solution_routines.f90
+implicit none
+
+!!input
+real*8 :: theta
+
+cot=1.d0/tan(theta)
+end function cot
+
 complex*16 function JacobiZeta(u,k)
 !!Jacobi Zeta function
 !!assumes u belongs to [F(0|m),F(pi|m)]
@@ -43,7 +63,7 @@ complex*16 :: u !!argument (equivalent to F(phi|m))
 complex*16 :: JacobiZeta
 
 !!internal variables
-real*8, parameter :: tol=1.d-7 !!base tolerance for integer tests
+real*8, parameter :: tol=2.d-7 !!base tolerance for integer tests
 real*8 :: m !!elliptic parameter
 real*8 :: phi !!Jacobi amplitude
 complex*16 :: Fc,Ec,F,E !!elliptic integral values
@@ -150,6 +170,20 @@ real*8 :: t
 real*8 :: f_2nd_derivative
 d3Fdt3=f_2nd_derivative(t)
 end function d3Fdt3
+
+real*8 function signum(x)
+!!signum function -- equivalent to Maple's abs(1,x) function
+!!assumes Im[x]=0 and x != 0
+implicit none
+complex*16 :: x
+if (x%RE.lt.0.d0) then
+ signum=-1.d0
+elseif (x%RE.gt.0.d0) then
+ signum=1.d0
+else
+ signum=0.d0 !!this branch is not used in practice
+end if
+end function signum
 
 real*8 function Heaviside(x)
 !!Heavyside function

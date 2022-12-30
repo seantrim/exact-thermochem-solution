@@ -307,7 +307,7 @@ end if
 end function S
 
 real*8 function arccot(x)
-!!inverse cotangent function -- range is (-pi/2,pi/2]-{0} for compitational convenience
+!!inverse cotangent function -- range is (-pi/2,pi/2]-{0} for computational convenience
 !!assuming x is real
 implicit none
 

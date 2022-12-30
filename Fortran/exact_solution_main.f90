@@ -34,19 +34,22 @@ real*8 :: z0       !!function for initial z position of a fluid parcel
 real*8 :: vRMS     !!function for RMS velocity
 
 !!testing
+character*256 :: fname !!output file name
 complex*16 :: kcomplex,InverseJacobiAM
 real*8 :: tstart,tfinish
+real*8 :: H_horizontal_boundaries
+real*8 :: arccot
 
 !!Input Parameters -- note that functions in input_functions.f90 must also be specified
-lambda=1.0d0; k=35.d0; zI=0.5d0; RaT=1.d5; RaC=1.d5 !!case 1 -- physical parameters
-nx=401; nz=401   !!case 1 -- mesh size
-t1=0.d0; t2=0.01d0 !!case 1 -- time range for entrainment time series
-nt=11             !!case 1 -- # of data points in the entrainment time series
+!lambda=1.0d0; k=35.d0; zI=0.5d0; RaT=1.d5; RaC=0.5d5 !!case 1 -- physical parameters
+!nx=401; nz=401   !!case 1 -- mesh size
+!t1=0.d0; t2=0.01d0 !!case 1 -- time range for entrainment time series
+!nt=11             !!case 1 -- # of data points in the entrainment time series
 
-!lambda=1.5d0; k=35.d0; zI=0.2d0; RaT=1.d6; RaC=8.d5 !!case 2 -- physical parameters
-!nx=301; nz=201    !!case 2 -- mesh size
-!t1=0.d0; t2=0.1d0 !!case 2 -- time range for entrainment time series
-!nt=11             !!case 2 -- # of data points in the entrainment time series
+lambda=1.5d0; k=35.d0; zI=0.2d0; RaT=1.d6; RaC=8.d5 !!case 2 -- physical parameters
+nx=751; nz=501    !!case 2 -- mesh size
+t1=0.d0; t2=0.1d0 !!case 2 -- time range for entrainment time series
+nt=11             !!case 2 -- # of data points in the entrainment time series
 !!End Input Parameters
 
 !!!complete elliptic integrals
@@ -77,7 +80,7 @@ write(*,*) ""
 !!!!!!!!!!!!!!!!!!!!!!!!!!!End Jacobi elliptic functions
 
 !!Functions for Mantle Convection
-x=0.2d0; z=0.2d0; t=0.01d0 !!sample coordinate and time for function evaluations
+x=0.2d0; z=0.2d0; t=0.0d0 !!sample coordinate and time for function evaluations
 call compute_z0(x,z,t,lambda,z0)
 call compute_H_func(x,z,t,lambda,k,zI,RaT,RaC,H)
 write(*,*) "Functions for Mantle Convection:"
@@ -96,23 +99,34 @@ allocate(H_array(1:nx,1:nz),T_array(1:nx,1:nz),C_array(1:nx,1:nz))
 call cpu_time(tstart)
 call compute_array('H',t,lambda,k,zI,RaT,RaC,nx,nz,H_array)
 call cpu_time(tfinish)
-call create_datafile(lambda,nx,nz,H_array,"H_data.dat")
+fname="H_data.dat"
+call create_datafile(lambda,nx,nz,H_array,fname)
 call compute_array('T',t,lambda,k,zI,RaT,RaC,nx,nz,T_array)
-call create_datafile(lambda,nx,nz,T_array,"T_data.dat")
+fname="T_data.dat"
+call create_datafile(lambda,nx,nz,T_array,fname)
 call compute_array('C',t,lambda,k,zI,RaT,RaC,nx,nz,C_array)
-call create_datafile(lambda,nx,nz,C_array,"C_data.dat")
+fname="C_data.dat"
+call create_datafile(lambda,nx,nz,C_array,fname)
 write(*,*) "H array compute time=",tfinish-tstart
 write(*,*) " "
 !!!!!!End Compute H, T, and C arrays and print to file
 
 !!!!Entrainment calculation
 zR=zI !!reference height
+fname="entrainment.dat"
 call cpu_time(tstart)
-call compute_entrainment(t1,t2,nt,zR,lambda,k,zI,RaT,RaC,nx,nz,"entrainment.dat")
+call compute_entrainment(t1,t2,nt,zR,lambda,k,zI,RaT,RaC,nx,nz,fname)
 call cpu_time(tfinish)
 write(*,*) "Entrainment compute time=",tfinish-tstart
 write(*,*) " "
 !!!!end Entrainment calculations
+
+!!developer testing
+!x=0.1d0; z=0.7d0; t=0.002d0
+!call compute_H_func(x,z,t,lambda,k,zI,RaT,RaC,H)
+!write(*,*) "Testing compute_H_func:"
+!write(*,*) "x,z,t=",x,z,t
+!write(*,*) "H=",H
 
 end program exact_solution
 
