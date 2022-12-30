@@ -36,14 +36,14 @@ This repository contains files and data supporting the article "Manufacturing an
     * note: does not calculate $H$ (see [Maple](/Maple))
 
 ### [Maple](/Maple)
-[maple_analytic_solution.mw](/Maple/maple_analytic_solution.mw)
-* Maple worksheet for symbolic computation of $H$
-* Results stored in [foo.m](/Maple/foo.m) 
+[maple_analytic_solution_include_exterior.mw](/Maple/maple_analytic_solution_include_exterior.mw)
+* Maple worksheet for symbolic computation of $H$ (everywhere except at the domain boundaries)
+* Results stored in [foo_exterior.m](/Maple/foo_exterior.m) 
 
-[foo.m](/Maple/foo.m)
-* Results from running [maple_analytic_solution.mw](/Maple/maple_analytic_solution.mw)
+[foo_exterior.m](/Maple/foo_exterior.m)
+* Results from running [maple_analytic_solution_include_exterior.mw](/Maple/maple_analytic_solution_include_exterior.mw)
 * Once loaded into a Maple worksheet, functions such as $C(x,z,t)$, $T(x,z,t)$, and $H(x,a,t)$ become available
-    * Saves time compared to rerunning [maple_analytic_solution.mw](/Maple/maple_analytic_solution.mw) 
+    * Saves time compared to rerunning [maple_analytic_solution_include_exterior.mw](/Maple/maple_analytic_solution_include_exterior.mw) 
 
 [Fortran_code_generation.mw](/Maple/Fortran_code_generation.mw)
 * Maple worksheet for translating Maple's $H$ formula into Fortran 77 code
