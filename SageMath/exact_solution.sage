@@ -16,31 +16,32 @@ pii=var('pii') ##custom pi variable to avoid memory leaks reported with RDF(pi) 
 
 ##Begin Inputs: Numerical Values
 #temporally periodic case
-#anum=RDF(100.0); bnum=RDF(100.0)  ##Numerical values of a and b
-#lamnum=RDF(1.0); ##aspect ratio
-#xnum=RDF(0.01*lamnum); znum=RDF(0.5); tnum=RDF(0.005) ##Numerical value of x,z, and t
-#knum=RDF(35.0) ##controls sharpness in logistic function
-#zInum=RDF(0.5) ##vertical position of compositional interface
-#RaTnum=RDF(1.0e5); RaCnum=RDF(1.0e5) ##Rayleigh numbers
+piinum=3.1415926535897932
+anum=RDF(100.0); bnum=RDF(100.0); cnum=RDF(0.0); dnum=RDF(0.0)  ##Numerical values of a and b
+lamnum=RDF(1.0); ##aspect ratio
+xnum=RDF(0.99*lamnum); znum=RDF(0.9); tnum=RDF(0.01) ##Numerical value of x,z, and t
+knum=RDF(35.0) ##controls sharpness in logistic function
+zInum=RDF(0.5) ##vertical position of compositional interface
+RaTnum=RDF(1.0e5); RaCnum=RDF(1.0e5) ##Rayleigh numbers
 #end temporally periodic case
 
 #approaching steady state case
-piinum=3.1415926535897932
-anum=RDF(600.0/(piinum*13.0^0.5)); bnum=RDF(100.0)  ##Numerical values of a and b
-cnum=RDF(50.0); dnum=RDF(4500.0/(piinum*13.0^0.5))
-lamnum=RDF(3.0/2.0); ##aspect ratio
-xnum=RDF(0.01*lamnum); znum=RDF(0.5); tnum=RDF(0.05) ##Numerical value of x,z, and t
-knum=RDF(35.0) ##controls sharpness in logistic function
-zInum=RDF(0.2) ##vertical position of compositional interface
-RaTnum=RDF(1.0e6); RaCnum=RDF(8.0e5) ##Rayleigh numbers
+#piinum=3.1415926535897932
+#anum=RDF(600.0/(piinum*13.0^0.5)); bnum=RDF(100.0)  ##Numerical values of a and b
+#cnum=RDF(50.0); dnum=RDF(4500.0/(piinum*13.0^0.5))
+#lamnum=RDF(3.0/2.0); ##aspect ratio
+#xnum=RDF(0.01*lamnum); znum=RDF(0.5); tnum=RDF(0.05) ##Numerical value of x,z, and t
+#knum=RDF(35.0) ##controls sharpness in logistic function
+#zInum=RDF(0.2) ##vertical position of compositional interface
+#RaTnum=RDF(1.0e6); RaCnum=RDF(8.0e5) ##Rayleigh numbers
 #end approaching steady state case
 ##End Inputs: Numerical Values
 
 ####Begin Functions -- use real_part to ensure result is of real type, and to suppress small imaginary parts due to numerical error 
 f=function('f')
 psi=f(t)*sin(pii*x/lam)*sin(pii*z) ##presumed stream function -- use generic time dependence
-#f_trial(t)=a*sin(b*pii*t) ##temporally periodic example
-f_trial(t)=a*sin(b*pii*t)*e^(-c*t)+d ##approaching steady state example
+f_trial(t)=a*sin(b*pii*t) ##temporally periodic example
+#f_trial(t)=a*sin(b*pii*t)*e^(-c*t)+d ##approaching steady state example
 
 D=sin(pii*x/lam)*sin(pii*z)
 z_bot=(1/pii)*arcsin(D)
@@ -56,10 +57,10 @@ z0=(1/pii)*arccos(real_part(jacobi('cn',elliptic_f(pii*z,1/D^2)-S*(I*pii^2*D/lam
 ##testing
 Q=log(abs(csc(pii*z)+cot(pii*z)))-(pii/lam)*S(x=xb)*integrate(f(tp),tp,0,t)
 Z0_ad=-1/2*(e^(-Q)-e^Q)
-#Z0_p=1/2*(e^(-Q)-e^Q)
-#Z0_m=-1/2*(e^(-Q)-e^Q)
-#z0_sides_p=(1/pii)*arccot(Z0_p)
-#z0_sides_m=(1/pii)*arccot(Z0_m)
+##Z0_p=1/2*(e^(-Q)-e^Q)
+##Z0_m=-1/2*(e^(-Q)-e^Q)
+##z0_sides_p=(1/pii)*arccot(Z0_p)
+##z0_sides_m=(1/pii)*arccot(Z0_m)
 z0_sides_Z0_p=(1/pii)*arccot(Z0_ad)
 z0_sides_Z0_n=1+(1/pii)*arccot(Z0_ad)
 ##end testing
@@ -131,7 +132,7 @@ print("x,z,t=",xnum,znum,tnum)
 #print("D=",D(x=xnum,z=znum,lam=lamnum).n())
 #print("z_top=",z_top(x=xnum,z=znum,lam=lamnum).n())
 #print("z_bot=",z_bot(x=xnum,z=znum,lam=lamnum).n())
-#print("z0=",z0(x=xnum,z=znum,t=tnum,a=anum,b=bnum,lam=lamnum).n())
+#print("z0=",z0(x=xnum,z=znum,t=tnum,a=anum,b=bnum,lam=lamnum,pii=piinum).n())
 #print("z0_sides_p=",z0_sides_p(z=znum,t=tnum,a=anum,b=bnum,lam=lamnum).n())
 #print("z0_sides_m=",z0_sides_m(z=znum,t=tnum,a=anum,b=bnum,lam=lamnum).n())
 #print("C=",C(x=xnum,z=znum,t=tnum,a=anum,b=bnum,lam=lamnum,k=knum,zI=zInum).n())
