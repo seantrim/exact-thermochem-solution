@@ -154,6 +154,7 @@ integer*4 :: nx,nz !!# of mesh points in the x and z directions
 real*8 :: array(1:nx,1:nz)
 
 !!internal variables
+integer*4, parameter :: n_ghost=10
 integer*4 :: iint,kint
 real*8 :: dx,dz
 real*8 :: x,z
@@ -191,7 +192,6 @@ elseif (option.eq.'H') then
   z=max(min(dz*real(kint-1,8),1.d0),0.d0)
   do iint=1,nx
    x=max(min(dx*real(iint-1,8),lambda),0.d0)
-   !array(iint,kint)=H_func(x,z,t,lambda,k,zI,RaT,RaC)
    call compute_H_func(x,z,t,lambda,k,zI,RaT,RaC,H_func)
    array(iint,kint)=H_func
   end do
@@ -203,6 +203,7 @@ end subroutine compute_array
 
 real*8 function T_func(x,z,t,lambda,k,zI,RaT,RaC)
 !!temperature function
+!!assumes x belongs to (-lambda/2,3/2*lambda) and z belongs to (-1,2)
 implicit none
 
 !!inputs
@@ -221,6 +222,8 @@ T_func=(-(pii**3*(lambda**2+1.d0)**2/lambda**3)*cos(pii*x/lambda)*sin(pii*z)*f_f
 end function T_func
 
 real*8 function C(x,z,t,lambda,k,zI)
+!!compute composition
+!!assumes x belongs to (-lambda/2,3/2*lambda) and z belongs to (-1,2)
 implicit none
 
 !!inputs
@@ -237,6 +240,7 @@ end function C
 
 subroutine compute_z0(x,z,t,lambda,z0)
 !!Compute z0: the initial z value for a fluid parcel at position (x,z) at time t.
+!!assumes x belongs to (-lambda/2,3/2*lambda) and z belongs to (-1,2)
 implicit none
 
 !!inputs
@@ -251,6 +255,7 @@ real*8, parameter :: pii=3.1415926535897932d0
 real*8 :: Q,arg,eQ,bigZ0 !!variables for sidewalls
 real*8 :: phi,m !!elliptic amplitude and parameter
 real*8 :: D,S,f_integral,arccot !!external functions
+real*8 :: x_,z_
 complex*16 :: F,E !!elliptic integrals of the first and second kinds
 complex*16 :: u   !!argument for the Jacobi elliptic functions
 complex*16 :: sn,cn,dn !!Jacobi elliptic function values
@@ -268,21 +273,47 @@ elseif ((x.eq.0.d0).or.(x.eq.lambda)) then
   z0=1.d0+arccot(bigZ0)/pii
  end if
 else
- phi=pii*z; m=1.d0/D(x,z,lambda)**2.d0
+ if (x.lt.0.d0) then !!beyond left sidewall
+  x_=-x
+ elseif (x.gt.lambda) then !!beyond right sidewall
+  x_=2.d0*lambda-x
+ else !!domain interior
+  x_=x
+ end if
+ if (z.lt.0.d0) then !!beyond bottom
+  z_=-z
+ elseif (z.gt.1.d0) then !!beyond top
+  z_=2.d0-z  
+ else !!domain interior
+  z_=z
+ end if
+ phi=pii*z_; m=1.d0/D(x_,z_,lambda)**2.d0
  call incomplete_elliptic_integrals(phi,m,F,E)
  u=F
- if (t.ne.0.d0) u%IM=u%IM-S(x,lambda)*(pii**2.d0*D(x,z,lambda)/lambda)*f_integral(t)
+ if (t.ne.0.d0) u%IM=u%IM-S(x_,lambda)*(pii**2.d0*D(x_,z_,lambda)/lambda)*f_integral(t)
  call Jacobi_elliptic_functions(u,m,sn,cn,dn)
  if (abs(cn%RE).gt.1.d0) then
   write(*,*) "compute_z0: large cn magnitude detected -- cn=",cn%RE
   stop
  end if
  z0=acos(cn%RE)/pii
+
+
+! phi=pii*z; m=1.d0/D(x,z,lambda)**2.d0
+! call incomplete_elliptic_integrals(phi,m,F,E)
+! u=F
+! if (t.ne.0.d0) u%IM=u%IM-S(x,lambda)*(pii**2.d0*D(x,z,lambda)/lambda)*f_integral(t)
+! call Jacobi_elliptic_functions(u,m,sn,cn,dn)
+! if (abs(cn%RE).gt.1.d0) then
+!  write(*,*) "compute_z0: large cn magnitude detected -- cn=",cn%RE
+!  stop
+! end if
+! z0=acos(cn%RE)/pii
 end if
 end subroutine compute_z0
 
 real*8 function D(x,z,lambda)
-!!assumes 0<=x<=lambda and 0<=z<=1 for lambda>0
+!!characteristic orbital value
 implicit none
 
 !!inputs
@@ -291,12 +322,12 @@ real*8 :: x,z,lambda
 !!internal variables
 real*8, parameter :: pii=3.1415926535897932d0
 
-D=sin(pii*x/lambda)*sin(pii*z)
+D=abs(sin(pii*x/lambda)*sin(pii*z))
 end function D
 
 real*8 function S(x,lambda)
 !!transformed unit step function
-!!assumes 0 <= x <= lambda
+!!assumes -lambda/2 <= x <= 3/2*lambda
 implicit none
 real*8 :: x,lambda
 if (x.le.lambda/2.d0) then

@@ -62,7 +62,7 @@ write(*,*) ""
 !!!end complete elliptic integrals
 
 !!!!!!!!!!!!!!!Incomplete elliptic integrals
-phi=1.57d0; m=10.d0
+phi=1.6d0; m=1000.d0
 call incomplete_elliptic_integrals(phi,m,Fi,Ei)
 write(*,*) "Incomplete Elliptic Integrals:"
 write(*,*) "phi,m=",phi,m
@@ -80,7 +80,7 @@ write(*,*) ""
 !!!!!!!!!!!!!!!!!!!!!!!!!!!End Jacobi elliptic functions
 
 !!Functions for Mantle Convection
-x=0.2d0; z=0.2d0; t=0.0d0 !!sample coordinate and time for function evaluations
+x=0.d0; z=0.21d0; t=0.0d0 !!sample coordinate and time for function evaluations
 call compute_z0(x,z,t,lambda,z0)
 call compute_H_func(x,z,t,lambda,k,zI,RaT,RaC,H)
 write(*,*) "Functions for Mantle Convection:"
@@ -120,13 +120,6 @@ call cpu_time(tfinish)
 write(*,*) "Entrainment compute time=",tfinish-tstart
 write(*,*) " "
 !!!!end Entrainment calculations
-
-!!developer testing
-!x=0.1d0; z=0.7d0; t=0.002d0
-!call compute_H_func(x,z,t,lambda,k,zI,RaT,RaC,H)
-!write(*,*) "Testing compute_H_func:"
-!write(*,*) "x,z,t=",x,z,t
-!write(*,*) "H=",H
 
 end program exact_solution
 

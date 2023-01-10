@@ -199,7 +199,121 @@ call elbdj2(phi,phic,n,mc,b,d,j) !!associate incomplete elliptic integrals
 F=b+d; E=b+real(mc,8)*d; P=F+n*j !!build standard elliptic integrals from associate elliptic integrals
 end subroutine incomplete_elliptic_integrals_standard_input_range
 
+subroutine incomplete_elliptic_integrals_standard_amp_large_parameter(phi,m,F,E)
+!!!!SJT: reduce parameter using reciprocal-modulus transformation (if needed)
+!!!!SJT: computes the incomplete elliptic integrals of first and second kind given amplitude phi and parameter m
+!!assumes 0<=phi<=pi/2 and 0<=m (m>1 is allowed)
+implicit none
+
+!!input
+real*8 :: phi,m !!elliptic amplitude and parameter
+
+!!output
+complex*16 :: F,E !!incomplete elliptic integrals of the first and second kind
+
+!!internal variables
+real*8, parameter :: pii=3.1415926535897932d0
+real*16, parameter :: pii_qp=3.14159265358979323846264338327950288q0
+real*8 :: piio2 !!constants
+real*8 :: phic,mc    !!complimentary variables
+real*8 :: phi_temp,phic_temp,b_temp,d_temp,j_temp !!temporary variables
+real*8 :: u !!argument of arcsine
+real*8 :: k !!elliptic modulus
+real*8 :: kr,mr !!reciprocal modulus and parameter
+real*8 :: mrc !!compliment of the reciprocal parameter
+complex*16 :: Fc,Ec !!complete elliptic integral values computed for m>1
+real*8 :: Fc_temp,Ec_temp,Pc_temp !!temporary complete elliptic integral values
+real*8 :: F_temp,E_temp,P_temp !!temporary incomplete elliptic integral values
+real*8 :: amp,ampc !!temporary elliptic amplitude variable and compliment
+real*8 :: sin_amp !!sine amplitude
+real*8 :: n !!characteristic
+real*16 :: mr_qp,mrc_qp,m_qp,mc_qp
+real*16 :: u_qp,phi_temp_qp,amp_qp,sin_amp_qp
+
+piio2=pii/2.d0
+n=0.d0 !!arbitrary characteristic -- integrals of the third kind are not used
+
+if (phi.eq.piio2) then
+ call complete_elliptic_integrals(m,F,E)
+else !!0<=phi<pi/2
+ if (m.gt.1.d0) then !!large parameter m>1
+  k=sqrt(m)
+  !mc=1.d0-m; mr=1.d0/m !!OG
+  mc=real(1.q0-real(m,16),8); mr_qp=1.q0/real(m,16)
+  !u=k*sin(phi) !!argument of arcsine
+  u_qp=real(k,16)*sin(real(phi,16))
+  if (u_qp.le.1.q0) then
+   !amp=asin(u)
+   amp=real(asin(u_qp),8)
+   call incomplete_elliptic_integrals_standard_input_range(amp,n,mr_qp,F_temp,E_temp,P_temp)
+   F=complex(F_temp/k,0.d0); E=complex(k*E_temp+mc*F%RE,0.d0)
+  else
+   !mrc=1.d0-mr; !!OG
+   mrc_qp=1.q0-mr_qp; mrc=real(mrc_qp,8)
+   !sin_amp=(sqrt(u**2.d0-1.d0))/(u*sqrt(mrc))
+   sin_amp_qp=(sqrt(u_qp**2-1.q0))/(u_qp*sqrt(mrc_qp))
+   !amp=asin(min(sin_amp,1.d0)) !!it is possible for sin_amp to be slightly greater than unity due to round off error
+   amp_qp=asin(min(sin_amp_qp,1.q0)); amp=real(amp_qp,8) !!it may be possible for sin_amp to be slightly greater than unity due to round off error
+   call complete_elliptic_integrals_standard_input_range(n,mr_qp,Fc_temp,Ec_temp,Pc_temp)
+   call incomplete_elliptic_integrals_standard_input_range(amp,n,mrc_qp,F_temp,E_temp,P_temp)
+   F=complex(Fc_temp,-F_temp)/k
+   E=complex(m*Ec_temp+mc*Fc_temp,&
+     &-F_temp+m*E_temp+real(((1.q0-m)*sin_amp_qp*cos(amp_qp))/sqrt(1.q0-mrc_qp*sin_amp_qp**2),8))/k
+  end if
+ else !!standard input ranges
+  m_qp=real(m,16)
+  call incomplete_elliptic_integrals_standard_input_range(phi,n,m_qp,F_temp,E_temp,P_temp)
+  F=complex(F_temp,0.d0); E=complex(E_temp,0.d0)
+ end if
+end if
+
+end subroutine incomplete_elliptic_integrals_standard_amp_large_parameter
+
 subroutine incomplete_elliptic_integrals(phi,m,F,E)
+!!!!SJT: computes the incomplete elliptic integrals of first and second kind given amplitude phi and parameter m
+!!assumes phi is real
+!!assumes 0<=m (m>1 is allowed but m must be real)
+implicit none
+
+!!input
+real*8 :: phi,m !!elliptic amplitude and parameter
+
+!!output
+complex*16 :: F,E !!incomplete elliptic integrals of the first and second kind
+
+!!internal variables
+real*8, parameter :: pii=3.1415926535897932d0
+real*8 :: piio2 !!constants
+complex*16 :: Fc,Ec !!complete elliptic integral values computed for m>1
+real*8 :: phi_std
+real*8 :: N0
+integer*4 :: N,i_sign
+
+piio2=pii/2.d0
+
+if ((0.d0.le.phi).and.(phi.le.piio2)) then !!standard amplitude range
+ call incomplete_elliptic_integrals_standard_amp_large_parameter(phi,m,F,E)
+else !!amplitude outside of standard range
+ call complete_elliptic_integrals(m,Fc,Ec)
+ N0=phi/pii;
+ N=nint(N0,4) !!integer multiplier
+ 
+ phi_std=phi-N*pii !!find appropriate phi in standard range
+ i_sign=1
+ if (phi_std.lt.0.d0) then
+  i_sign=-1
+  phi_std=abs(phi_std)
+ end if
+
+ phi_std=abs(phi_std)
+ call incomplete_elliptic_integrals_standard_amp_large_parameter(phi_std,m,F,E)
+ F=2*N*Fc+i_sign*F
+ E=2*N*Ec+i_sign*E
+end if
+
+end subroutine incomplete_elliptic_integrals
+
+subroutine incomplete_elliptic_integrals_old(phi,m,F,E)
 !!!!SJT: reduce amplitude first, then reduce parameter (if needed)
 !!!!SJT: computes the incomplete elliptic integrals of first and second kind given amplitude phi and parameter m
 !!assumes 0<=phi<=pi and 0<=m (m>1 is allowed)
@@ -310,7 +424,7 @@ else !!0<=phi<pi/2
   F=complex(F_temp,0.d0); E=complex(E_temp,0.d0)
  end if
 end if
-end subroutine incomplete_elliptic_integrals
+end subroutine incomplete_elliptic_integrals_old
 
 subroutine incomplete_elliptic_integral_trapezoidal_rule(phi,k,Ntheta)
 !!compute the incomplete elliptic integral of the first kind via the trapezoidal rule in quad precision

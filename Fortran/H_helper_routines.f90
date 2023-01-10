@@ -34,17 +34,6 @@ real*8 :: phi !!Jacobi amplitude
 complex*16 :: Fc,Ec,F,E !!elliptic integral values
 complex*16 :: sn,cn,dn !!Jacobi elliptic function values
 
-!!!original
-!m=k%RE**2
-!call complete_elliptic_integrals(m,Fc,Ec)
-!call Jacobi_elliptic_functions(u,m,sn,cn,dn)
-!
-!phi=acos(cn%RE) !!due to the presumed range of u
-!call incomplete_elliptic_integrals(phi,m,F,E) !!assuming imaginary part of phi is negligible
-!
-!JacobiZeta=E-Ec*u/Fc
-!!end original
-
 call compute_JacobiZeta(u,k,JacobiZeta)
 end function JacobiZeta
 
@@ -63,6 +52,7 @@ complex*16 :: u !!argument (equivalent to F(phi|m))
 complex*16 :: JacobiZeta
 
 !!internal variables
+real*8, parameter :: tol_IM=2.d-7 !!tolerance for cn%IM size
 real*8, parameter :: tol=2.d-7 !!base tolerance for integer tests
 real*8 :: m !!elliptic parameter
 real*8 :: phi !!Jacobi amplitude
@@ -82,7 +72,7 @@ if (abs(cn%RE).gt.1.d0) then
  write(*,*) "Error in compute_JacobiZeta -- abs(cn%RE) is greater than unity"
  write(*,*) "cn=",cn
  stop
-elseif (abs(cn%IM).gt.1.d-10) then
+elseif (abs(cn%IM).gt.tol_IM) then
  write(*,*) "Error in compute_JacobiZeta -- cn%IM is not zero"
  write(*,*) "u,k,m=",u,k,m
  write(*,*) "cn=",cn
@@ -162,14 +152,6 @@ real*8 :: t
 real*8 :: f_derivative
 d2Fdt2=f_derivative(t)
 end function d2Fdt2
-
-real*8 function d3Fdt3(t)
-!!wrapper function for derivative of f(t)
-implicit none
-real*8 :: t
-real*8 :: f_2nd_derivative
-d3Fdt3=f_2nd_derivative(t)
-end function d3Fdt3
 
 real*8 function signum(x)
 !!signum function -- equivalent to Maple's abs(1,x) function
