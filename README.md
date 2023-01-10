@@ -102,7 +102,7 @@ This repository contains files and data supporting the article "Manufacturing an
 ### Standalone
 Can be used to generate data for $C$, $T$, $H$, $v_{RMS}$, and $E$ from the exact solution.
 
-1. Specify $f(t)$, $df/dt$, $d^2 f/dt^2$ and $\int f dt$ in [input_functions.f90](/Fortran/input_functions.f90)
+1. Specify $f(t)$, $df/dt$, and $\int f dt$ in [input_functions.f90](/Fortran/input_functions.f90)
     * Both cases from the "Sample Results" section are shown as examples in [input_functions.f90](/Fortran/input_functions.f90)
 2. Specify physical parameters (e.g., aspect ratio, Rayleigh numbers, etc.) in [exact_solution_main.f90](/Fortran/exact_solution_main.f90)
     * Search for "!!Input Parameters" in the comments
@@ -122,7 +122,7 @@ Can be used to generate data for $C$, $T$, $H$, $v_{RMS}$, and $E$ from the exac
 ### With a Convection Code
 Can be used to calculate $H(x,z,t)$ from within a convection code. These instructions presume that the convection code is written in Fortran. However, options for other programming languages are under development. The following steps are guidelines only. The precise procedure may depend on the particular convection code used.
 
-1. Specify $f(t)$, $df/dt$, $d^2 f/dt^2$ and $\int f dt$ in [input_functions.f90](/Fortran/input_functions.f90)
+1. Specify $f(t)$, $df/dt$, and $\int f dt$ in [input_functions.f90](/Fortran/input_functions.f90)
     * Both cases from the "Sample Results" section are shown as examples in [input_functions.f90](/Fortran/input_functions.f90)
 2. Insert calls to the subroutine `compute_H_func`, which returns the value of $H(x,z,t)$, within the source of the convection code where necessary
     * It is presumed that the convection code can accept an internal heating rate the varies in space and time
