@@ -1,4 +1,4 @@
-# exact-thermochem-solution
+# exact-thermochem-solution [![DOI](https://zenodo.org/badge/534176632.svg)](https://zenodo.org/badge/latestdoi/534176632)
 
 ## Contents
 1. [Background](#background)
