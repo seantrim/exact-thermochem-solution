@@ -35,9 +35,9 @@ xmid=lambda/2.d0
 if (x.lt.0.d0) then !!symmetry about left sidewall
  x_=-x
 elseif (x.gt.lambda) then !!symmetry about right sidewall
-x_=2.d0*lambda-x
+ x_=2.d0*lambda-x
 else !!within problem domain (interior + boundaries)
-x_=x
+ x_=x
 end if
 
 if ((z.eq.0.d0).or.(z.eq.1.d0)) then !!at top/bottom boundary

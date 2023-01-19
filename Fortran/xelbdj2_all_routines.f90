@@ -4,6 +4,7 @@
 !!!!SJT: modified computations of m from mc to reduce truncation error when mc is close to unity
 !!!!SJT: added implicit none statements to each routine
 !!!!SJT: modified upper limits on two do loops in celbdj to avoid an index potentially going out of bounds
+!!!!SJT: disabled save and data statements in variable declarations for thread safety
 !!!!SJT: otherwise, the routines are unedited
 !---------------------------------------------------------------------------
 subroutine elbdj2(phi,phic,n,mc_qp,b,d,j) !!SJT
@@ -104,7 +105,7 @@ parameter (PIHALF=1.5707963267948966192313216916398d0)
 parameter (PI=3.1415926535897932384626433832795d0)
 parameter (PIINV=0.31830988618379067153776752674503d0)
 real*8 mcold,elbold,eldold
-save mcold,elbold,eldold
+!save mcold,elbold,eldold !!SJT: disable for thread safety -- variables are initialized at start of each celbd call
 real*8 Q1,Q2,Q3,Q4,Q5,Q6,Q7,Q8,Q9,Q10,Q11,Q12,Q13,Q14,Q15,Q16
 parameter (Q1=1.d0/16.d0,Q2=1.d0/32.d0,Q3=21.d0/1024.d0)
 parameter (Q4=31.d0/2048.d0,Q5=6257.d0/524288.d0)
@@ -145,7 +146,9 @@ parameter (D6=14553.d0/262144.d0)
 parameter (D7=99099.d0/2097152.d0)
 parameter (D8=2760615.d0/67108864.d0)
 real*8 logq2,dkkc,dddc,ddc,dele,delb,elk1
-logical first/.TRUE./
+!logical first/.TRUE./    !!!SJT: note that logical variable first is always .true. at the start of each routine call
+logical first !!SJT: initialization within declaration not allowed due to thread safety
+first=.true.  !!SJT: initialize outside of declaration for thread safety
 if(first) then
     first=.FALSE.
 	mcold=1.d0
@@ -600,8 +603,10 @@ parameter (PIHALF=1.5707963267948966d0)
 parameter (EPS=1.11d-16)
 parameter (THIRD=1.d0/3.d0)
 real*8 B(IMAX)
-logical first /.TRUE./
-save B,first
+!logical first /.TRUE./  !!!SJT: note that logical variable first is .true. at the start of each routine call
+!save B,first !!SJT: disable for thread safety
+logical first !!SJT: initialization cannot be in declaration for thread-safe calculations
+first=.true. !!SJT: initialization outside of declaration
 mc0=real(mc0_qp,8) !!SJT
 if(mc0.le.0.d0) then
     write(*,*) "(celbdj) Out of domain: mc <= 0"
@@ -1288,8 +1293,8 @@ implicit none !!SJT
 real*8 t,h,z,y,x
 real*8 a,r,ri,hold,rold,riold
 real*8 A3,A5,A7,A9,A11,A13,A15,A17,A19,A21,A23,A25
-data hold/1.d0/, rold/1.d0/,riold/1.d0/
-save hold,rold,riold
+!data hold/1.d0/, rold/1.d0/,riold/1.d0/ !!SJT: disable for thread safety
+!save hold,rold,riold !!SJT: disable for thread safety
 parameter (A3=1.d0/3.d0)
 parameter (A5=1.d0/5.d0)
 parameter (A7=1.d0/7.d0)
@@ -1302,6 +1307,9 @@ parameter (A19=1.d0/19.d0)
 parameter (A21=1.d0/21.d0)
 parameter (A23=1.d0/23.d0)
 parameter (A25=1.d0/25.d0)
+!!!!!SJT: replace data statment with manual value assignment for thread safety
+hold=1.d0; rold=1.d0; riold=1.d0
+!!!!!SJT: end replace data statment with manual value assignment for thread safety
 !
 ! write(*,*) "(uatan) t,h=",t,h
 !

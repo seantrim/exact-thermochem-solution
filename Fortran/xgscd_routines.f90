@@ -3,7 +3,8 @@
 !!!!SJT: deleted sample data at end of file so that the file could be compiled
 !!!!SJT: converted to free form -- comment character "!" used throughout -- "&" used at left and right sides for line continuation
 !!!!SJT: added implicit none statements to each routine
-!!!!SJT: modified computations of m from mc in an attempt to reduce truncation error when mc is close to unity
+!!!!SJT: disabled save statement in variable declaration for thread safety
+!!!!SJT: modified computations of m from mc (quad precision) in an attempt to reduce truncation error when mc is close to unity
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine gscd(u,mc_qp,s,c,d) !!SJT
 !subroutine gscd(u,mc,s,c,d) !!SJT: original
@@ -295,8 +296,10 @@ end
 	parameter (D13=9569130097211.d0/2251799813685248.d0)
 	parameter (D14=17652604545791.d0/4503599627370496.d0)
 !c
-	logical first/.TRUE./
-	save first,mcold,PIHALF,PIINV,elkold,TINY
+	!logical first/.TRUE./ !!SJT: note that logical variable first is .true. at the start of each routine call
+	!save first,mcold,PIHALF,PIINV,elkold,TINY !!SJT: disabled for thread safety
+        logical first !!SJT: initialization cannot be in declaration statement for thread safety purposes
+        first=.true. !!SJT: initialization outside of declaration for thread safety
 !c
 	if(first) then
 		first=.FALSE.
