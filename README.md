@@ -18,6 +18,9 @@
 This repository contains files and data supporting the article "Manufacturing an exact solution for 2D thermochemical mantle convection models" by S.J. Trim, S.L. Butler, S.S.C. McAdam, and R.J. Spiteri. Computer algebra scripts for the exact solution are provided in SageMath and Maple. Symbolic computation of the internal heating rate is performed using Maple, which has been translated into Fortran. The Fortran routines can be used to calculate quantities from the exact solution both independently and within an existing convection code.
 
 ## Variable Definitions
+* $\lambda$ = aspect ratio
+* $x$ = horizontal position ( $x \in (-\lambda/2,3 \lambda/2)$ )
+* $z$ = vertical position ( $z \in (-1,2)$ , increasing upward)
 * $t$ = time
 * $C$ = composition
 * $T$ = temperature
@@ -42,7 +45,7 @@ This repository contains files and data supporting the article "Manufacturing an
 
 [foo_exterior.m](/Maple/foo_exterior.m)
 * Results from running [maple_analytic_solution_include_exterior.mw](/Maple/maple_analytic_solution_include_exterior.mw)
-* Once loaded into a Maple worksheet, functions such as $C(x,z,t)$, $T(x,z,t)$, and $H(x,a,t)$ become available
+* Once loaded into a Maple worksheet, functions such as $C(x,z,t)$, $T(x,z,t)$, and $H(x,z,t)$ become available
     * Saves time compared to rerunning [maple_analytic_solution_include_exterior.mw](/Maple/maple_analytic_solution_include_exterior.mw) 
 
 [Fortran_code_generation.mw](/Maple/Fortran_code_generation.mw)
