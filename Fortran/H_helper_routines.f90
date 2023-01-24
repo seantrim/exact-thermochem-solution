@@ -20,7 +20,6 @@ end function cot
 
 complex*16 function JacobiZeta(u,k)
 !!Jacobi Zeta function
-!!assumes u belongs to [F(0|m),F(pi|m)]
 !!assumes imaginary part of k is zero
 implicit none
 
@@ -39,7 +38,6 @@ end function JacobiZeta
 
 subroutine compute_JacobiZeta(u,k,JacobiZeta)
 !!Jacobi Zeta function
-!!assumes u belongs to [F(0|m),F(pi|m)]
 !!assumes imaginary part of k is zero
 !!assumes the Jacobi amplitude (phi) is real
 implicit none
@@ -52,8 +50,7 @@ complex*16 :: u !!argument (equivalent to F(phi|m))
 complex*16 :: JacobiZeta
 
 !!internal variables
-real*8, parameter :: tol_IM=2.d-7 !!tolerance for cn%IM size
-real*8, parameter :: tol=2.d-7 !!base tolerance for integer tests
+real*8, parameter :: tol_IM=1.d-3 !!tolerance for cn%IM size
 real*8 :: m !!elliptic parameter
 real*8 :: phi !!Jacobi amplitude
 complex*16 :: Fc,Ec,F,E !!elliptic integral values
@@ -61,15 +58,18 @@ complex*16 :: twoFc !!two times Fc
 complex*16 :: sn,cn,dn !!Jacobi elliptic function values
 real*8 :: Nm_IM,Np_IM,Nm_RE,Np_RE !!periodicity multiplier
 real*8 :: fraction_Nm_RE,fraction_Np_RE,fraction_Nm_IM,fraction_Np_IM
+real*8 :: delta_Nm_RE,delta_Np_RE,delta_Nm_IM,delta_Np_IM
 logical :: IM_periodic,RE_periodic
 logical :: int_p_RE,int_m_RE,int_p_IM,int_m_IM
 
 m=k%RE**2
 call complete_elliptic_integrals(m,Fc,Ec)
+twoFc=2.d0*Fc !!store this for frequent use
 call Jacobi_elliptic_functions(u,m,sn,cn,dn)
 
 if (abs(cn%RE).gt.1.d0) then
  write(*,*) "Error in compute_JacobiZeta -- abs(cn%RE) is greater than unity"
+ write(*,*) "u,k,m=",u,k,m
  write(*,*) "cn=",cn
  stop
 elseif (abs(cn%IM).gt.tol_IM) then
@@ -80,27 +80,25 @@ elseif (abs(cn%IM).gt.tol_IM) then
 end if
 phi=acos(cn%RE) !!produces phi belonging to [0,pi] which works with incomplete_elliptic_integrals routine
 call incomplete_elliptic_integrals(phi,m,F,E) !!assuming imaginary part of phi is negligible
-twoFc=2.d0*Fc !!store this for frequent use
 
 !!Re[u] not in the presumed range? 
 RE_periodic=.not.((((0.d0.le.u%RE).and.(u%RE.le.(twoFc%RE))).or.(((twoFc%RE).lt.u%RE).and.(u%RE.le.0.d0))))
 if (RE_periodic.eqv..true.) then
  Nm_RE=(u%RE-F%RE)/(twoFc%RE)
  Np_RE=(u%RE+F%RE)/(twoFc%RE)
- fraction_Nm_RE=abs(mod(Nm_RE,1.d0)) !fractional parts of N values -- should be very close to zero for integer values of N
+ fraction_Nm_RE=abs(mod(Nm_RE,1.d0)) !fractional parts of N values -- should be very close to zero or unity for integer values of N
  fraction_Np_RE=abs(mod(Np_RE,1.d0))
- int_p_RE=((fraction_Np_RE.le.abs(tol*Np_RE)).or.((1.d0-fraction_Np_RE).le.abs(tol*Np_RE)).or.(abs(Np_RE).lt.tol))
- int_m_RE=((fraction_Nm_RE.le.abs(tol*Nm_RE)).or.((1.d0-fraction_Nm_RE).le.abs(tol*Nm_RE)).or.(abs(Nm_RE).lt.tol))
+ delta_Nm_RE=min(fraction_Nm_RE,1.d0-fraction_Nm_RE)
+ delta_Np_RE=min(fraction_Np_RE,1.d0-fraction_Np_RE)
+ if (delta_Np_RE.lt.delta_Nm_RE) then
+  int_p_RE=.true.; int_m_RE=.false.
+ else
+  int_p_RE=.false.; int_m_RE=.true.
+ end if
  if (int_p_RE.eqv..true.) then
   E%RE=2.d0*Ec%RE*Np_RE-E%RE !!use periodicity of elliptic integrals
  elseif (int_m_RE.eqv..true.) then
   E%RE=2.d0*Ec%RE*Nm_RE+E%RE
- else
-  write(*,*) "Error in compute_JacobiZeta -- integer multipliers for real parts do not meet tolerance."
-  write(*,*) "  Either Nm_RE or Np_RE should be near an integer value."
-  write(*,*) "  Nm_RE,Np_RE=",Nm_RE,Np_RE
-  write(*,*) "  May need to increase tolerance (tol parameter) in compute_JacobiZeta routine (H_helper_functions.f90)."
-  stop
  end if
 end if
 
@@ -109,20 +107,19 @@ IM_periodic=.not.((((0.d0.le.u%IM).and.(u%IM.le.(twoFc%IM))).or.(((twoFc%IM).lt.
 if (IM_periodic.eqv..true.) then
  Nm_IM=(u%IM-F%IM)/(twoFc%IM)
  Np_IM=(u%IM+F%IM)/(twoFc%IM)
- fraction_Nm_IM=abs(mod(Nm_IM,1.d0)) !!fractional parts of N values -- should be very close to zero for integer values of N
+ fraction_Nm_IM=abs(mod(Nm_IM,1.d0)) !!fractional parts of N values -- should be very close to zero or unity for integer values of N
  fraction_Np_IM=abs(mod(Np_IM,1.d0))
- int_p_IM=((fraction_Np_IM.le.abs(tol*Np_IM)).or.((1.d0-fraction_Np_IM).le.abs(tol*Np_IM)).or.(abs(Np_IM).lt.tol))
- int_m_IM=((fraction_Nm_IM.le.abs(tol*Nm_IM)).or.((1.d0-fraction_Nm_IM).le.abs(tol*Nm_IM)).or.(abs(Nm_IM).lt.tol))
+ delta_Nm_IM=min(fraction_Nm_IM,1.d0-fraction_Nm_IM)
+ delta_Np_IM=min(fraction_Np_IM,1.d0-fraction_Np_IM)
+ if (delta_Np_IM.lt.delta_Nm_IM) then
+  int_p_IM=.true.; int_m_IM=.false.
+ else
+  int_p_IM=.false.; int_m_IM=.true.
+ end if
  if (int_p_IM.eqv..true.) then
   E%IM=2.d0*Ec%IM*Np_IM-E%IM
  elseif (int_m_IM.eqv..true.) then
   E%IM=2.d0*Ec%IM*Nm_IM+E%IM
- else
-  write(*,*) "Error in compute_JacobiZeta -- integer multipliers for imaginary parts do not meet tolerance."
-  write(*,*) "  Either Nm_IM or Np_IM should be near an integer value."
-  write(*,*) "  Nm_IM,Np_IM=",Nm_IM,Np_IM
-  write(*,*) "  May need to increase tolerance (tol parameter) in compute_JacobiZeta routine (H_helper_functions.f90)."
-  stop
  end if
 end if
 

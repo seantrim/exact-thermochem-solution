@@ -35,7 +35,7 @@ real*8 :: vRMS     !!function for RMS velocity
 
 !!testing
 character*256 :: fname !!output file name
-complex*16 :: kcomplex,InverseJacobiAM
+complex*16 :: kcomplex,InverseJacobiAM,JacobiZeta
 real*8 :: tstart,tfinish
 real*8 :: H_horizontal_boundaries
 real*8 :: arccot
@@ -79,8 +79,19 @@ write(*,*) "sn,cn,dn=",sn,cn,dn
 write(*,*) ""
 !!!!!!!!!!!!!!!!!!!!!!!!!!!End Jacobi elliptic functions
 
+!!!!!Jacobi Zeta function (uses Maple's conventions)
+phi=3.555d0; kcomplex=(100.d0,0.d0)
+m=kcomplex%RE**2
+call incomplete_elliptic_integrals(phi,m,Fi,Ei)
+u=Fi
+call compute_JacobiZeta(u,kcomplex,JacobiZeta)
+write(*,*) "JacobiZeta function:"
+write(*,*) u,kcomplex,JacobiZeta
+write(*,*) ""
+!!!!!End Jacobi Zeta function
+
 !!Functions for Mantle Convection
-x=5.5d-2; z=5.5d-2; t=0.01d0 !!sample coordinate and time for function evaluations
+x=5.5d-2; z=5.5d-2; t=0.005d0 !!sample coordinate and time for function evaluations
 call compute_z0(x,z,t,lambda,z0)
 call compute_H_func(x,z,t,lambda,k,zI,RaT,RaC,H)
 write(*,*) "Functions for Mantle Convection:"
