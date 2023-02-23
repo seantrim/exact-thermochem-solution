@@ -7,7 +7,8 @@
     1. [SageMath](#sagemath)
     2. [Maple](#maple)
     3. [Fortran](#fortran)
-    4. [Data](#data)
+    4. [Python](#python)
+    5. [Data](#data)
 4. [How to Use the Fortran Routines](#how-to-use-the-fortran-routines)
     1. [Standalone](#standalone)
     2. [With a Convection Code](#with-a-convection-code)
@@ -28,6 +29,10 @@ This repository contains files and data supporting the article "Manufacturing an
 * $v_{RMS}$ = root-mean-square velocity
 * $E$ = entrainment
 * $f(t)$ = time dependence of the stream function
+* $k$ =  parameter that controls the initial thickness of the compositional interface
+* $z_{I}$ = initial vertical position of the compositional interface
+* $Ra_T$ = thermal Rayleigh number
+* $Ra_C$ = compositional Rayleigh number
 
 ## File Description
 
@@ -91,6 +96,16 @@ This repository contains files and data supporting the article "Manufacturing an
 * Results from running [compile_script](/Fortran/compile_script) in the terminal using the .f90 files in the [Fortran](/Fortran) folder
 * gfortran 11.3.0 was used  
 
+### [Python](/Python)
+[create_library.sh](/Python/create_library.sh)
+* script used to create a Python library from the [Fortran](/Fortran) routines 
+
+[flib.cpython-310-x86_64-linux-gnu.so](/Python/flib.cpython-310-x86_64-linux-gnu.so)
+* sample library file produced using [create_library.sh](/Python/create_library.sh)
+
+[example.py](/Python/example.py)
+* Python script with examples on how to use functions in the [Fortran](/Fortran) routines within Python
+
 ### [Data](/Data)
 [entrainment_sample_1_401x401.dat](/Data/entrainment_sample_1_401x401.dat)
 * $E$ time series data for temporally periodic case in "Sample Results" section 
@@ -123,12 +138,14 @@ Can be used to generate data for $C$, $T$, $H$, $v_{RMS}$, and $E$ from the exac
     * Modifying the examples in [exact_solution_main.f90](/Fortran/exact_solution_main.f90) can be done to customize the output
 
 ### With a Convection Code
-Can be used to calculate $H(x,z,t)$ from within a convection code. These instructions presume that the convection code is written in Fortran. However, options for other programming languages are under development. The following steps are guidelines only. The precise procedure may depend on the particular convection code used.
+Can be used to calculate $H(x,z,t)$ from within a convection code. These instructions presume that the convection code is written in Fortran or Python. However, options for other programming languages are under development. The following steps are guidelines only. The precise procedure may depend on the particular convection code used.
+
+#### Fortran
 
 1. Specify $f(t)$, $df/dt$, and $\int f dt$ in [input_functions.f90](/Fortran/input_functions.f90)
     * Both cases from the "Sample Results" section are shown as examples in [input_functions.f90](/Fortran/input_functions.f90)
 2. Insert calls to the subroutine `compute_H_func`, which returns the value of $H(x,z,t)$, within the source of the convection code where necessary
-    * It is presumed that the convection code can accept an internal heating rate the varies in space and time
+    * It is presumed that the convection code can accept an internal heating rate that varies in space and time
     * An example of how to call `compute_H_func` is shown in [exact_solution_main.f90](/Fortran/exact_solution_main.f90)
         * The H value is returned in the rightmost argument  
 4. Link all f90 files from the [Fortran](/Fortran) folder except [exact_solution_main.f90](/Fortran/exact_solution_main.f90) to the source for the convection code
@@ -141,6 +158,23 @@ Can be used to calculate $H(x,z,t)$ from within a convection code. These instruc
         * Resolve any related compiler errors
         * Verify that the arguments of `compute_H_func` correspond to the correct values and data types 
 5. Run the convection code execuatable as usual
+
+#### Python
+
+1. Specify $f(t)$, $df/dt$, and $\int f dt$ in [input_functions.f90](/Fortran/input_functions.f90)
+    * Both cases from the "Sample Results" section are shown as examples in [input_functions.f90](/Fortran/input_functions.f90)
+2. Run [create_library.sh](/Python/create_library.sh) from the terminal
+    * Linux: `source create_library`
+    * Creates flib Python library using f2py3 (included in NumPy library)
+    * gfortran 11.3.0 or later is recommended for the Fortran compiler used by f2py3
+3. Add 'import flib' to the Python environment
+    * functions defined in the [Fortran](/Fortran) routines can now be called in Python
+    * See [example.py](/Python/example.py) for an example
+4. Insert calls to the function `flib.h_python`, which returns the value of $H(x,z,t)$, within the source of the convection code where necessary
+    * `flib.h_python` takes $x$, $z$, $t$, $\lambda$, $k$, $z_{I}$, $Ra_T$, and $Ra_C$ as input arguments (in that order)
+    * See [example.py](/Python/example.py) for an example
+    * It is presumed that the convection code can accept an internal heating rate that varies in space and time
+5. Run the convection code as usual
 
 ## Legal
 
