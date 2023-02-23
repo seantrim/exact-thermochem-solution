@@ -167,14 +167,15 @@ Can be used to calculate $H(x,z,t)$ from within a convection code. These instruc
     * Linux: `source create_library`
     * Creates flib Python library using f2py3 (included in NumPy library)
     * gfortran 11.3.0 or later is recommended for the Fortran compiler used by f2py3
-3. Add 'import flib' to the Python environment
+3. Move flib library file (e.g., [flib.cpython-310-x86_64-linux-gnu.so](/Python/flib.cpython-310-x86_64-linux-gnu.so) or similar) to the same directory as the convection code source
+4. Add `import flib` to the convection code Python environment
     * functions defined in the [Fortran](/Fortran) routines can now be called in Python
     * See [example.py](/Python/example.py) for an example
-4. Insert calls to the function `flib.h_python`, which returns the value of $H(x,z,t)$, within the source of the convection code where necessary
+5. Insert calls to the function `flib.h_python`, which returns the value of $H(x,z,t)$, within the source of the convection code where necessary
     * `flib.h_python` takes $x$, $z$, $t$, $\lambda$, $k$, $z_{I}$, $Ra_T$, and $Ra_C$ as input arguments (in that order)
     * See [example.py](/Python/example.py) for an example
     * It is presumed that the convection code can accept an internal heating rate that varies in space and time
-5. Run the convection code as usual
+6. Run the convection code as usual
 
 ## Legal
 
