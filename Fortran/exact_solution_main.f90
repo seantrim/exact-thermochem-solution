@@ -91,7 +91,7 @@ write(*,*) ""
 !!!!!End Jacobi Zeta function
 
 !!Functions for Mantle Convection
-x=5.5d-2; z=5.5d-2; t=0.005d0 !!sample coordinate and time for function evaluations
+x=0.999d0; z=0.999d0; t=0.005d0 !!sample coordinate and time for function evaluations
 call compute_z0(x,z,t,lambda,z0)
 call compute_H_func(x,z,t,lambda,k,zI,RaT,RaC,H)
 write(*,*) "Functions for Mantle Convection:"

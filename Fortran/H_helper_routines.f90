@@ -1,3 +1,15 @@
+real*8 function H_python(x,z,t,lambda,k,zI,RaT,RaC)
+!!Compute H -- For Python wrapper
+!!Assumes -lambda/2<x<3/2*lambda and -1<z<2
+!!Allows evaluation for domain interior, boundaries, and beyond the boundaries (for ghost points)
+implicit none
+
+!!inputs
+real*8 :: x,z,t,lambda,k,zI,RaT,RaC
+
+call compute_H_func(x,z,t,lambda,k,zI,RaT,RaC,H_python)
+end function H_python
+
 real*8 function csc(theta)
 !!cosecant function
 implicit none
