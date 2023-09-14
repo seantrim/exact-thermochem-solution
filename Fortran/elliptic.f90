@@ -17,7 +17,14 @@ real*8 :: k  !!modulus
 complex*16 :: u_temp !!temporary argument
 complex*16 :: sn_temp,cn_temp,dn_temp !!temporary Jacobi elliptic function values
 
-if (m.gt.1.d0) then
+if (abs(u) < 8*epsilon(0.d0)) then
+ ! sn,cn,dn are constant wrt m when u=0. This case is useful because z0 will call
+ ! this subroutine with m=\infty and u\approx0 on H's boundary. In this case, u_temp=NaN
+ sn=0.d0; dn=1.d0; cn=1.d0
+elseif (abs(m-1.d0) < 8*epsilon(m)) then
+ ! m=1 cases from fig 16.6 of Abramowitz and Stegun Handbook of Mathematical Functions
+ sn=tanh(u); cn=1/cosh(u); dn=1/cosh(u)
+elseif (m.gt.1.d0) then
  k=sqrt(m); mr=1.d0/m
  u_temp=k*u
  !write(*,*) "JEF u,m,k,u_temp,mr=",u,m,k,u_temp,mr
@@ -165,8 +172,24 @@ piio2=pii/2.d0
 !mc=1.d0-m !!complimentary parameter
 mc=1.q0-m
 !k=sqrt(m); mc=(1.d0+k)*(1.d0-k)
-call elbdj2(piio2,zero,n,mc,bc,dc,jc) !!returns the associate complete elliptic integrals
-Fc=bc+dc; Ec=bc+real(mc,8)*dc; Pc=Fc+n*jc !!build standard elliptic integrals from associate elliptic integrals
+
+if (abs(m-1.d0) < 8*epsilon(m)) then
+ ! m=1 the integrals defining Fc,Ec,Pc are straightforward to compute with a trig sub
+ Fc = huge(0.d0); Ec = 1.d0
+ if (abs(n) < 8*epsilon(n)) then
+  jc = 1/3.d0
+ else if (n.ge.1) then
+  jc = huge(0.d0) ! TODO this might be too naive... maybe there's a well defined complex output?
+ else if (n > 0) then
+  jc = atanh(sqrt(n)*sin(piio2))/(n**1.5) - sin(piio2)/n
+ else ! n < 0 (unnecessary given the assumptions)
+  jc = -sin(piio2)/n - atan(sqrt(-n)*sin(piio2))/((-n)**1.5)
+ end if
+ Pc=Fc+n*jc
+else
+ call elbdj2(piio2,zero,n,mc,bc,dc,jc) !!returns the associate complete elliptic integrals
+ Fc=bc+dc; Ec=bc+real(mc,8)*dc; Pc=Fc+n*jc !!build standard elliptic integrals from associate elliptic integrals
+end if
 end subroutine complete_elliptic_integrals_standard_input_range
 
 subroutine incomplete_elliptic_integrals_standard_input_range(phi,n,m,F,E,P)
@@ -195,8 +218,20 @@ phic=piio2-phi;
 !k=sqrt(m); mc=(1.d0+k)*(1.d0-k)
 !mc=1.d0-m
 mc=1.q0-m
-call elbdj2(phi,phic,n,mc,b,d,j) !!associate incomplete elliptic integrals
-F=b+d; E=b+real(mc,8)*d; P=F+n*j !!build standard elliptic integrals from associate elliptic integrals
+if (abs(m-1.d0) < 8*epsilon(m)) then !! parameter m is approx 1
+ F = log(1.d0/cos(phi) + tan(phi)); E = sign(sin(phi), cos(phi))
+ if (abs(n) < 8*epsilon(n)) then
+  j = sin(phi)**3/3
+ else if (n>0) then
+  j = atanh(sqrt(n)*sin(phi))/(n**1.5) - sin(phi)/n
+ else ! n < 0 (unnecessary given the assumptions)
+  j = -sin(phi)/n - atan(sqrt(-n)*sin(phi))/((-n)**1.5)
+ end if
+ P=F+n*j
+else
+ call elbdj2(phi,phic,n,mc,b,d,j) !!associate incomplete elliptic integrals
+ F=b+d; E=b+real(mc,8)*d; P=F+n*j !!build standard elliptic integrals from associate elliptic integrals
+end if
 end subroutine incomplete_elliptic_integrals_standard_input_range
 
 subroutine incomplete_elliptic_integrals_standard_amp_large_parameter(phi,m,F,E)
