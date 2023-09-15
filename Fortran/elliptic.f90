@@ -1,3 +1,22 @@
+complex*16 function sech(u)
+!!hyperbolic secant function
+implicit none
+
+!!input
+complex*16 :: u
+
+!! internal variables
+complex*16 :: c
+
+c = cosh(u)
+if(abs(c) > huge(0.d0)) then 
+ ! For some reason 1/(inf+1i*inf) = (NaN,NaN) in Fortran, so we'll manually account for that
+ sech=0.d0
+else
+ sech=1.d0/c
+end if
+end function sech
+
 subroutine Jacobi_elliptic_functions(u,m,sn,cn,dn)
 !!computes the Jacobi elliptic functions sn, cn, and dn
 !!argument u can be any complex value
@@ -16,6 +35,7 @@ real*8 :: mr !!reciprocal parameter
 real*8 :: k  !!modulus
 complex*16 :: u_temp !!temporary argument
 complex*16 :: sn_temp,cn_temp,dn_temp !!temporary Jacobi elliptic function values
+complex*16 :: sech
 
 if (abs(u) < 8*epsilon(0.d0)) then
  ! sn,cn,dn are constant wrt m when u=0. This case is useful because z0 will call
@@ -23,7 +43,7 @@ if (abs(u) < 8*epsilon(0.d0)) then
  sn=0.d0; dn=1.d0; cn=1.d0
 elseif (abs(m-1.d0) < 8*epsilon(m)) then
  ! m=1 cases from fig 16.6 of Abramowitz and Stegun Handbook of Mathematical Functions
- sn=tanh(u); cn=1/cosh(u); dn=1/cosh(u)
+ sn=tanh(u); cn=sech(u); dn=sech(u)
 elseif (m.gt.1.d0) then
  k=sqrt(m); mr=1.d0/m
  u_temp=k*u
@@ -121,7 +141,7 @@ implicit none
 real*8 :: m !!elliptic characteristic and parameter
 
 !!output
-complex*16 :: Fc,Ec !!complete elliptic integrals of the first and  second kinds
+complex*16 :: Fc,Ec !!complete elliptic integrals of the first and second kinds
 
 !!internal variables
 real*8 :: mc !!compliment of elliptic parameter
@@ -135,8 +155,9 @@ real*16 :: m_qp,mc_qp,mr_qp,mrc_qp !!quad precision variables
 n=0.d0 !!arbitrary characteristic value -- integrals of the third kind are not used
 
 if (m.gt.1.d0) then
+ ! Note that when m is large (eg m>=10^30) then mr_qp is approx 0 and mrc_qp is approx 1
+ ! which can be problematic
  k=sqrt(m)
- !mc=1.d0-m; mr=1.d0/m; mrc=1.d0-mr
  m_qp=real(m,16); mr_qp=real(1.d0/m,16); mrc_qp=1.q0-mr_qp; mc_qp=1.q0-m_qp; mc=real(mc_qp,8)
  call complete_elliptic_integrals_standard_input_range(n,mr_qp,Fc_r,Ec_r,Pc_r)
  call complete_elliptic_integrals_standard_input_range(n,mrc_qp,Fc_rc,Ec_rc,Pc_rc)
@@ -173,16 +194,20 @@ piio2=pii/2.d0
 mc=1.q0-m
 !k=sqrt(m); mc=(1.d0+k)*(1.d0-k)
 
-if (abs(m-1.d0) < 8*epsilon(m)) then
- ! m=1 the integrals defining Fc,Ec,Pc are straightforward to compute with a trig sub
- Fc = huge(0.d0); Ec = 1.d0
- if (abs(n) < 8*epsilon(n)) then
+! Fc->\infty EXTREMELY SUDDENLY as m->1. For example, when m=1-1e-33 then Fc\approx 40.
+! Thankfully, elbdj2 only returns NaNs when m is literally exactly 1. It'd likely converge
+! for more extreme values of m if the type of m could represent those values
+if (m.eq.1.d0) then ! strict equality is intentional here
+ ! when m=1 the integrals defining Fc,Ec,Pc are straightforward to compute with a trig sub
+ Fc = 50.d0; Ec = 1.d0
+ !Fc = huge(0.d0); Ec = 1.d0
+ if (abs(n) < 4*epsilon(n)) then
   jc = 1/3.d0
  else if (n.ge.1) then
   jc = huge(0.d0) ! TODO this might be too naive... maybe there's a well defined complex output?
  else if (n > 0) then
   jc = atanh(sqrt(n)*sin(piio2))/(n**1.5) - sin(piio2)/n
- else ! n < 0 (unnecessary given the assumptions)
+ else ! n < 0
   jc = -sin(piio2)/n - atan(sqrt(-n)*sin(piio2))/((-n)**1.5)
  end if
  Pc=Fc+n*jc
@@ -218,13 +243,13 @@ phic=piio2-phi;
 !k=sqrt(m); mc=(1.d0+k)*(1.d0-k)
 !mc=1.d0-m
 mc=1.q0-m
-if (abs(m-1.d0) < 8*epsilon(m)) then !! parameter m is approx 1
+if (abs(m-1.d0).eq.epsilon(m)) then !! parameter m is approx 1
  F = log(1.d0/cos(phi) + tan(phi)); E = sign(sin(phi), cos(phi))
  if (abs(n) < 8*epsilon(n)) then
   j = sin(phi)**3/3
  else if (n>0) then
   j = atanh(sqrt(n)*sin(phi))/(n**1.5) - sin(phi)/n
- else ! n < 0 (unnecessary given the assumptions)
+ else ! n < 0
   j = -sin(phi)/n - atan(sqrt(-n)*sin(phi))/((-n)**1.5)
  end if
  P=F+n*j
@@ -334,13 +359,9 @@ else !!amplitude outside of standard range
  N=nint(N0,4) !!integer multiplier
  
  phi_std=phi-N*pii !!find appropriate phi in standard range
- i_sign=1
- if (phi_std.lt.0.d0) then
-  i_sign=-1
-  phi_std=abs(phi_std)
- end if
-
+ i_sign = sign(1.d0,phi_std)
  phi_std=abs(phi_std)
+
  call incomplete_elliptic_integrals_standard_amp_large_parameter(phi_std,m,F,E)
  F=2*N*Fc+i_sign*F
  E=2*N*Ec+i_sign*E
@@ -348,160 +369,3 @@ end if
 
 end subroutine incomplete_elliptic_integrals
 
-subroutine incomplete_elliptic_integrals_old(phi,m,F,E)
-!!!!SJT: reduce amplitude first, then reduce parameter (if needed)
-!!!!SJT: computes the incomplete elliptic integrals of first and second kind given amplitude phi and parameter m
-!!assumes 0<=phi<=pi and 0<=m (m>1 is allowed)
-implicit none
-
-!!input
-real*8 :: phi,m !!elliptic amplitude and parameter
-
-!!output
-complex*16 :: F,E !!incomplete elliptic integrals of the first and second kind
-
-!!internal variables
-real*8, parameter :: pii=3.1415926535897932d0
-real*16, parameter :: pii_qp=3.14159265358979323846264338327950288q0
-real*8 :: zero,piio2 !!constants
-real*8 :: b,d,j      !!associate incomplete elliptic integrals
-real*8 :: bc,dc,jc   !!associate complete elliptic integrals
-real*8 :: phic,mc    !!complimentary variables
-real*8 :: phi_temp,phic_temp,b_temp,d_temp,j_temp !!temporary variables
-real*8 :: u !!argument of arcsine
-real*8 :: k !!elliptic modulus
-real*8 :: kr,mr !!reciprocal modulus and parameter
-real*8 :: mrc !!compliment of the reciprocal parameter
-complex*16 :: Fc,Ec !!complete elliptic integral values computed for m>1
-real*8 :: Fc_temp,Ec_temp,Pc_temp !!temporary complete elliptic integral values
-real*8 :: F_temp,E_temp,P_temp !!temporary incomplete elliptic integral values
-real*8 :: amp,ampc !!temporary elliptic amplitude variable and compliment
-real*8 :: sin_amp !!sine amplitude
-real*8 :: n !!characteristic
-real*16 :: mr_qp,mrc_qp,m_qp,mc_qp
-real*16 :: u_qp,phi_temp_qp,amp_qp,sin_amp_qp
-
-zero=0.d0
-piio2=pii/2.d0
-n=0.d0 !!arbitrary characteristic -- integrals of the third kind are not used
-
-if (phi.gt.piio2) then !!if phi is outside standard range (but assuming phi<=pi)
- if (m.gt.1.d0) then !!large parameter m>1
-  call complete_elliptic_integrals(m,Fc,Ec)
-  phi_temp_qp=pii_qp-real(phi,16); phi_temp=real(phi_temp_qp,8) !!need F(phi_temp | m) with m>1 and phi_temp<=pi/2 -- i.e., large parameter case
-  k=sqrt(m)
-  !!mc=1.d0-m; mr=1.d0/m !!OG
-  mc_qp=1.q0-real(m,16); mc=real(mc_qp,8); mr_qp=1.q0/real(m,16)
-  !u=k*sin(phi_temp) !!argument of arcsine
-  u_qp=real(k,16)*sin(phi_temp_qp)
-  if (u_qp.le.1.q0) then
-   !amp=asin(u)
-   amp=real(asin(u_qp),8)
-   call incomplete_elliptic_integrals_standard_input_range(amp,n,mr_qp,F_temp,E_temp,P_temp)
-   F=complex(F_temp/k,0.d0); E=complex(k*E_temp+mc*F%RE,0.d0) !F(phi_temp | m) and E(phi_temp | m)
-  else
-   !!mrc=1.d0-mr; !!OG
-   mrc_qp=1.q0-mr_qp; mrc=real(mrc_qp,8)
-   !sin_amp=(sqrt(u**2.d0-1.d0))/(u*sqrt(mrc))
-   sin_amp_qp=(sqrt(u_qp**2-1.q0))/(u_qp*sqrt(mrc_qp))
-   !amp=asin(min(sin_amp,1.d0)) !!it is possible for sin_amp to be slightly greater than unity due to round off error
-   amp_qp=asin(min(sin_amp_qp,1.q0)); amp=real(amp_qp,8) !!it may be possible for sin_amp to be slightly greater than unity due to round off error
-   call complete_elliptic_integrals_standard_input_range(n,mr_qp,Fc_temp,Ec_temp,Pc_temp)
-   call incomplete_elliptic_integrals_standard_input_range(amp,n,mrc_qp,F_temp,E_temp,P_temp)
-   F=complex(Fc_temp,-F_temp)/k !F(phi_temp | m) and E(phi_temp | m)
-   !E=complex(m*Ec_temp+mc*Fc_temp,-F_temp+m*E_temp+(mc*sin_amp*cos(amp))/sqrt(1.d0-mrc*sin_amp**2.d0))/k
-   E=complex(m*Ec_temp+mc*Fc_temp,-F_temp+m*E_temp+real((mc_qp*sin_amp_qp*cos(amp_qp))/sqrt(1.q0-mrc_qp*sin_amp_qp**2),8))/k
-   !!E=complex(m*Ec_temp+(1.d0-m)*Fc_temp,-F_temp+m*E_temp+(mc*sin_amp*cos(amp))/sqrt(1.d0-mrc*sin_amp**2.d0))/k
-  end if
-  F=-F+2.d0*Fc; E=-E+2.d0*Ec 
- else !!0<=m<=1
-  m_qp=real(m,16)
-  call complete_elliptic_integrals_standard_input_range(n,m_qp,Fc_temp,Ec_temp,Pc_temp)
-  !phi_temp=pii-phi
-  phi_temp_qp=pii_qp-real(phi,16); phi_temp=real(phi_temp_qp,8)
-  call incomplete_elliptic_integrals_standard_input_range(phi_temp,n,m_qp,F_temp,E_temp,P_temp)
-  F=complex(-F_temp+2.d0*Fc_temp,0.d0); E=complex(-E_temp+2.d0*Ec_temp,0.d0)
- end if
-elseif (phi.eq.piio2) then
- call complete_elliptic_integrals(m,F,E)
-else !!0<=phi<pi/2
- if (m.gt.1.d0) then !!large parameter m>1
-  k=sqrt(m)
-  !mc=1.d0-m; mr=1.d0/m !!OG
-  mc=real(1.q0-real(m,16),8); mr_qp=1.q0/real(m,16)
-  !u=k*sin(phi) !!argument of arcsine
-  u_qp=real(k,16)*sin(real(phi,16))
-  if (u_qp.le.1.q0) then
-   !amp=asin(u)
-   amp=real(asin(u_qp),8)
-   call incomplete_elliptic_integrals_standard_input_range(amp,n,mr_qp,F_temp,E_temp,P_temp)
-   F=complex(F_temp/k,0.d0); E=complex(k*E_temp+mc*F%RE,0.d0)
-  else
-   !mrc=1.d0-mr; !!OG
-   mrc_qp=1.q0-mr_qp; mrc=real(mrc_qp,8)
-   !sin_amp=(sqrt(u**2.d0-1.d0))/(u*sqrt(mrc))
-   sin_amp_qp=(sqrt(u_qp**2-1.q0))/(u_qp*sqrt(mrc_qp))
-   !amp=asin(min(sin_amp,1.d0)) !!it is possible for sin_amp to be slightly greater than unity due to round off error
-   amp_qp=asin(min(sin_amp_qp,1.q0)); amp=real(amp_qp,8) !!it may be possible for sin_amp to be slightly greater than unity due to round off error
-   call complete_elliptic_integrals_standard_input_range(n,mr_qp,Fc_temp,Ec_temp,Pc_temp)
-   call incomplete_elliptic_integrals_standard_input_range(amp,n,mrc_qp,F_temp,E_temp,P_temp)
-   F=complex(Fc_temp,-F_temp)/k
-   !E=complex(m*Ec_temp+mc*Fc_temp,-F_temp+m*E_temp+(mc*sin_amp*cos(amp))/sqrt(1.d0-mrc*sin_amp**2.d0))/k
-   !E=complex(m*Ec_temp+mc*Fc_temp,-F_temp+m*E_temp+real((mc_qp*sin_amp_qp*cos(amp_qp))/sqrt(1.q0-mrc_qp*sin_amp_qp**2),8))/k
-   !!mc_qp may not be correct at this point -- therefore we have the correction that follows
-   E=complex(m*Ec_temp+mc*Fc_temp,&
-     &-F_temp+m*E_temp+real(((1.q0-m)*sin_amp_qp*cos(amp_qp))/sqrt(1.q0-mrc_qp*sin_amp_qp**2),8))/k
-   !E=complex(m*Ec_temp+(1.d0-m)*Fc_temp,-F_temp+m*E_temp+(mc*sin_amp*cos(amp))/sqrt(1.d0-mrc*sin_amp**2.d0))/k
-  end if
- else !!standard input ranges
-  m_qp=real(m,16)
-  call incomplete_elliptic_integrals_standard_input_range(phi,n,m_qp,F_temp,E_temp,P_temp)
-  F=complex(F_temp,0.d0); E=complex(E_temp,0.d0)
- end if
-end if
-end subroutine incomplete_elliptic_integrals_old
-
-subroutine incomplete_elliptic_integral_trapezoidal_rule(phi,k,Ntheta)
-!!compute the incomplete elliptic integral of the first kind via the trapezoidal rule in quad precision
-!!used to compute reference values by brute force that may be used for testing
-!!not intended to be used in production runs
-implicit none
-
-!!input
-real*16 :: phi !!Jacobi amplitude 
-real*16 :: k !!elliptic modulus
-integer*4 :: Ntheta !!# of mesh points
-
-!!output
-complex*32 :: F !!elliptic integral of the first kind
-
-!!internal variable
-real*16 :: theta !!variable of integration
-real*16 :: dtheta !!mesh spacing
-integer*4 :: Nindex !!index counter
-
-dtheta=phi/real(Ntheta-1,16)
-
-F=(0.q0,0.q0)
-theta=0.q0
-
-do Nindex=1,Ntheta-1
- theta=real(Nindex-1,16)*dtheta
- !F=F+dtheta*(integrand(theta,k)+integrand(theta+dtheta,k))/2.q0
- !F=F+dtheta*(integrand(theta,k)+4.q0*integrand(theta+dtheta/2.q0,k)+integrand(theta+dtheta,k))/6.q0
- F=F+dtheta*(integrand(theta,k)+3.q0*integrand(theta+dtheta/3.q0,k)+3.q0*integrand(theta+dtheta*2.q0/3.q0,k)&
-            &+integrand(theta+dtheta,k))/8.d0
- !write(*,*) theta,theta+dtheta
- !write(*,*) integrand(theta,m),integrand(theta+dtheta,m)
-end do
-write(*,*) "IEITR: F",F
-
-contains
-
- complex*32 function integrand(theta,k)
- implicit none
- real*16 :: theta,k
-  integrand=(1.q0,0.q0)/sqrt(complex(1.q0-(k*sin(theta))**2,0.q0))
- end function integrand
-
-end subroutine incomplete_elliptic_integral_trapezoidal_rule
