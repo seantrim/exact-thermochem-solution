@@ -252,6 +252,7 @@ real*8 :: z0
 
 !!internal variables
 real*8, parameter :: pii=3.1415926535897932d0
+real*8, parameter :: eps = 8*epsilon(0.d0)
 real*8 :: Q,arg,eQ,bigZ0 !!variables for sidewalls
 real*8 :: phi,m !!elliptic amplitude and parameter
 real*8 :: D,S,f_integral,arccot !!external functions
@@ -260,9 +261,9 @@ complex*16 :: F,E !!elliptic integrals of the first and second kinds
 complex*16 :: u   !!argument for the Jacobi elliptic functions
 complex*16 :: sn,cn,dn !!Jacobi elliptic function values
 
-if ((z.eq.0.d0).or.(z.eq.1.d0).or.((x.eq.(lambda/2.d0)).and.(z.eq.0.5d0))) then
+if ((abs(z)<eps).or.(abs(z-1.d0)<eps).or.(abs(x-lambda/2.d0)<eps).and.(abs(z-0.5d0)<eps)) then
  z0=z
-elseif ((x.eq.0.d0).or.(x.eq.lambda)) then
+elseif ((abs(x)<eps).or.(abs(x-lambda)<eps)) then
  arg=pii*z
  Q=log(abs(1.d0/sin(arg)+1.d0/tan(arg)))-pii/lambda*S(x,lambda)*f_integral(t)
  eQ=exp(Q)
@@ -281,34 +282,36 @@ else
   x_=x
  end if
  if (z.lt.0.d0) then !!beyond bottom
-  z_=-z
+  _=-z
  elseif (z.gt.1.d0) then !!beyond top
   z_=2.d0-z  
  else !!domain interior
   z_=z
  end if
- phi=pii*z_; m=1.d0/D(x_,z_,lambda)**2.d0
+ phi=pii*z_; m=min(1.d0/D(x_,z_,lambda)**2.d0, 1e33)
  call incomplete_elliptic_integrals(phi,m,F,E)
  u=F
  if (t.ne.0.d0) u%IM=u%IM-S(x_,lambda)*(pii**2.d0*D(x_,z_,lambda)/lambda)*f_integral(t)
  call Jacobi_elliptic_functions(u,m,sn,cn,dn)
- if (abs(cn%RE).gt.1.d0) then
-  write(*,*) "compute_z0: large cn magnitude detected -- cn=",cn%RE
-  stop
+
+ ! we'll take outputs barely outside range(cos) to be exactly 1
+ if(abs(abs(cn%RE)-1.d0) < 4*epsilon(m)) then
+  cn%RE = sign(1.d0,cn%RE)
  end if
  z0=acos(cn%RE)/pii
 
+ if (z0/=z0) then
+  write(*,*) "compute_z0: z0=NaN detected"
+  write(*,*) "(x,z,t)=(",x,",",z,",",t,")"
+  write(*,*) "(phi,m)=(",phi,",",m,")"
+  write(*,*) "F=",F
+  write(*,*) "u=",u
+  write(*,*) "sn=",sn
+  write(*,*) "cn=",cn
+  write(*,*) "dn=",dn
+  stop
+ end if
 
-! phi=pii*z; m=1.d0/D(x,z,lambda)**2.d0
-! call incomplete_elliptic_integrals(phi,m,F,E)
-! u=F
-! if (t.ne.0.d0) u%IM=u%IM-S(x,lambda)*(pii**2.d0*D(x,z,lambda)/lambda)*f_integral(t)
-! call Jacobi_elliptic_functions(u,m,sn,cn,dn)
-! if (abs(cn%RE).gt.1.d0) then
-!  write(*,*) "compute_z0: large cn magnitude detected -- cn=",cn%RE
-!  stop
-! end if
-! z0=acos(cn%RE)/pii
 end if
 end subroutine compute_z0
 
