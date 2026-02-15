@@ -1,4 +1,8 @@
 program exact_solution
+use elliptic,only: complete_elliptic_integrals,incomplete_elliptic_integrals,Jacobi_elliptic_functions
+use H_helper_routines,only: compute_JacobiZeta
+use H_function,only: compute_H_func
+use exact_solution_routines,only: C,T_func,vRMS,compute_z0,compute_array,create_datafile,compute_entrainment
 implicit none
 
 real*8, parameter :: pii=3.1415926535897932d0
@@ -29,16 +33,17 @@ real*8 :: t1,t2       !!initial and final times for time series data
 real*8, allocatable :: C_array(:,:),T_array(:,:),H_array(:,:) !!arrays for C, T, and H fields
 
 !!external functions
-real*8 :: C,T_func !!functions for C and T
+!real*8 :: C,T_func !!functions for C and T
 real*8 :: z0       !!function for initial z position of a fluid parcel
-real*8 :: vRMS     !!function for RMS velocity
+!real*8 :: vRMS     !!function for RMS velocity
 
 !!testing
 character*256 :: fname !!output file name
-complex*16 :: kcomplex,InverseJacobiAM,JacobiZeta
+!complex*16 :: kcomplex,InverseJacobiAM,JacobiZeta
+complex*16 :: kcomplex,JacobiZeta
 real*8 :: tstart,tfinish
-real*8 :: H_horizontal_boundaries
-real*8 :: arccot
+!real*8 :: H_horizontal_boundaries
+!real*8 :: arccot
 
 !!Input Parameters -- note that functions in input_functions.f90 must also be specified
 lambda=1.0d0; k=35.d0; zI=0.5d0; RaT=1.d5; RaC=0.5d5 !!case 1 -- physical parameters
