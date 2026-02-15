@@ -55,7 +55,7 @@ This repository contains files and data supporting the article "Manufacturing an
 
 [Fortran_code_generation.mw](/Maple/Fortran_code_generation.mw)
 * Maple worksheet for translating Maple's $H$ formula into Fortran 77 code
-* The result was adapted to free form Fortran for use in [H_func.f90](/Fortran/H_func.f90)
+* The result was adapted to free form Fortran for use in [H_function.f90](/Fortran/H_function.f90)
 
 ### [Fortran](/Fortran)
 [exact_solution_main.f90](/Fortran/exact_solution_main.f90)
@@ -65,11 +65,11 @@ This repository contains files and data supporting the article "Manufacturing an
 * Contains routines for calculating physical quantities including:
     * $C$, $T$, $H$, $v_{RMS}$, and $E$
 
-[H_func.f90](/Fortran/H_func.f90)
+[H_function.f90](/Fortran/H_function.f90)
 * Contains routine for evaluating $H(x,z,t)$
 
 [H_helper_routines.f90](/Fortran/H_helper_routines.f90)
-* Contains Fortran equivalents of Maple functions referenced in [H_func.f90](/Fortran/H_func.f90)
+* Contains Fortran equivalents of Maple functions referenced in [H_function.f90](/Fortran/H_function.f90)
 
 [input_functions.f90](/Fortran/input_functions.f90)
 * Contains user defined function $f(t)$, with its integral and derivatives
@@ -149,7 +149,7 @@ Can be used to calculate $H(x,z,t)$ from within a convection code. These instruc
     * An example of how to call `compute_H_func` is shown in [exact_solution_main.f90](/Fortran/exact_solution_main.f90)
         * The H value is returned in the rightmost argument  
 4. Link all f90 files from the [Fortran](/Fortran) folder except [exact_solution_main.f90](/Fortran/exact_solution_main.f90) to the source for the convection code
-    * Example: `gfortran -flto -O3 convection_code_source.f90 exact_solution_routines.f90 elliptic.f90 H_helper_routines.f90 xelbdj2_all_routines.f90 xgscd_routines.f90 H_func.f90 input_functions.f90 -o convection_code`
+    * Example: `gfortran -flto -O3 convection_code_source.f90 exact_solution_routines.f90 elliptic.f90 H_helper_routines.f90 xelbdj2_all_routines.f90 xgscd_routines.f90 H_function.f90 input_functions.f90 -o convection_code`
     * In the above example, the source for the convection code is `convection_code_source.f90` and the resulting executable is `convection_code`
         * Modify these names as needed
     * gfortran 11.3.0 or later is recommended
