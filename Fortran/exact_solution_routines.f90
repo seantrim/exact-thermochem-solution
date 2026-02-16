@@ -111,7 +111,7 @@ contains
  integral=0.d0
  iint_min=nint(xmin/dx,4)+1
  iint_max=nint(xmax/dx,4)+1
- do iint=iint_min,iint_max
+ do iint=iint_min,iint_max-1
   integral=integral+dx*(array_1D(iint)+array_1D(iint+1))/2.d0
  end do
  end subroutine integral_1D
