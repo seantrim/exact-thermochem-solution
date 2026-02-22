@@ -11,7 +11,7 @@ contains
  implicit none
  
  !!inputs
- real*8 :: t
+ real*8,intent(in) :: t
  
  !!internal variables
  real*8, parameter :: pii=3.1415926535897932d0
@@ -33,7 +33,7 @@ contains
  implicit none
  
  !!inputs
- real*8 :: t
+ real*8,intent(in) :: t
  
  !!internal variables
  real*8, parameter :: pii=3.1415926535897932d0
@@ -55,7 +55,7 @@ contains
  implicit none
  
  !!inputs
- real*8 :: t
+ real*8,intent(in) :: t
  
  !!internal variables
  real*8, parameter :: pii=3.1415926535897932d0
