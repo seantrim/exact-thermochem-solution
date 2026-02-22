@@ -6,7 +6,6 @@ program exact_solution
  !!Variables for Physical Quantities
  real*8 :: x,z,t   !!position and time
  real*8 :: lambda  !!aspect ratio
- real*8 :: D       !!D value corresponding to the characteristic oribtial
  real*8 :: k       !!interface thickness parameter
  real*8 :: z0      !!initial z position of a fluid parcel
  real*8 :: zI,zR   !!initial z position of interface and reference z for entrainment
