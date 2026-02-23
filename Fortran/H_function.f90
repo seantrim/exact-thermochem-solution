@@ -1,19 +1,19 @@
 module H_function
-
+ use kind_parameters,only: dp
  implicit none
  private
  public :: compute_H_func,H_python
 
 contains
 
- real*8 function H_python(x,z,t,lambda,k,zI,RaT,RaC)
+ real(dp) function H_python(x,z,t,lambda,k,zI,RaT,RaC)
   !!Compute H -- For Python wrapper
   !!Assumes -lambda/2<x<3/2*lambda and -1<z<2
   !!Allows evaluation for domain interior, boundaries, and beyond the boundaries (for ghost points)
   implicit none
   
   !!inputs
-  real*8,intent(in) :: x,z,t,lambda,k,zI,RaT,RaC
+  real(dp),intent(in) :: x,z,t,lambda,k,zI,RaT,RaC
   
   call compute_H_func(x,z,t,lambda,k,zI,RaT,RaC,H_python)
  end function H_python
@@ -25,58 +25,58 @@ contains
   implicit none
   
   !!inputs
-  real*8,intent(in) :: x,z,t,lambda,k,zI,RaT,RaC
+  real(dp),intent(in) :: x,z,t,lambda,k,zI,RaT,RaC
   
   !!output
-  real*8,intent(out) :: H_func
+  real(dp),intent(out) :: H_func
   
   !!internal variables
-  real*8, parameter :: tol=1.d-8
-  real*8 :: xmid
-  real*8 :: xL,xR,x_
-  complex*16 :: H,HL,HR
+  real(dp), parameter :: tol=1.e-8_dp
+  real(dp) :: xmid
+  real(dp) :: xL,xR,x_
+  complex(dp) :: H,HL,HR
   
   !!input validation
-  if ((x.le.-lambda/2.d0).or.(x.ge.3.d0/2.d0*lambda).or.(z.le.-1.d0).or.(z.ge.2.d0)) then
-   write(*,*) "Error in compute_H_func: requested position not supported."
-   write(*,*) "Requested x,z=",x,z
-   write(*,*) "lambda=",lambda
-   write(*,*) "Supported x range is -lambda/2<x<3/2*lambda"
-   write(*,*) "Supported z range is -1<z<2."
+  if ((x.le.-lambda/2._dp).or.(x.ge.3._dp/2._dp*lambda).or.(z.le.-1._dp).or.(z.ge.2._dp)) then
+   print *, "Error in compute_H_func: requested position not supported."
+   print *, "Requested x,z=",x,z
+   print *, "lambda=",lambda
+   print *, "Supported x range is -lambda/2<x<3/2*lambda"
+   print *, "Supported z range is -1<z<2."
    stop
   end if 
   
-  xmid=lambda/2.d0
+  xmid=lambda/2._dp
   
-  if (x.lt.0.d0) then !!symmetry about left sidewall
+  if (x.lt.0._dp) then !!symmetry about left sidewall
    x_=-x
   else if (x.gt.lambda) then !!symmetry about right sidewall
-   x_=2.d0*lambda-x
+   x_=2._dp*lambda-x
   else !!within problem domain (interior + boundaries)
    x_=x
   end if
   
-  if ((z.eq.0.d0).or.(z.eq.1.d0)) then !!at top/bottom boundary
+  if ((z.eq.0._dp).or.(z.eq.1._dp)) then !!at top/bottom boundary
    H_func=H_horizontal_boundaries(z,RaC,RaT,k,zI)
-  else if ((x_.eq.0.d0).or.(x_.eq.lambda)) then !!at sidewalls
+  else if ((x_.eq.0._dp).or.(x_.eq.lambda)) then !!at sidewalls
    call compute_H_sidewalls(x_,z,t,lambda,k,zI,RaT,RaC,H_func)
   else if (((xmid-tol).le.x_).and.(x_.le.(xmid+tol))) then !!mid line
-   xL=xmid-2.d0*tol; xR=xmid+2.d0*tol
-   if (z.lt.0.d0) then
+   xL=xmid-2._dp*tol; xR=xmid+2._dp*tol
+   if (z.lt.0._dp) then
     call compute_H_below(xL,z,t,lambda,k,zI,RaT,RaC,HL)
     call compute_H_below(xR,z,t,lambda,k,zI,RaT,RaC,HR)
-   else if (z.gt.1.d0) then
+   else if (z.gt.1._dp) then
     call compute_H_above(xL,z,t,lambda,k,zI,RaT,RaC,HL)
     call compute_H_above(xR,z,t,lambda,k,zI,RaT,RaC,HR)
    else
     call compute_H_domain(xL,z,t,lambda,k,zI,RaT,RaC,HL)
     call compute_H_domain(xR,z,t,lambda,k,zI,RaT,RaC,HR)
    end if
-   H_func=(HL%RE+HR%RE)/2.d0
-  else if (z.lt.0.d0) then
+   H_func=(HL%RE+HR%RE)/2._dp
+  else if (z.lt.0._dp) then
    call compute_H_below(x_,z,t,lambda,k,zI,RaT,RaC,H)
    H_func=H%RE
-  else if (z.gt.1.d0) then
+  else if (z.gt.1._dp) then
    call compute_H_above(x_,z,t,lambda,k,zI,RaT,RaC,H)
    H_func=H%RE
   else !!elsewhere (not at the domain boundaries)
@@ -86,25 +86,25 @@ contains
  
  end subroutine compute_H_func
  
- real*8 function H_horizontal_boundaries(z,RaC,RaT,k,zI)
+ real(dp) function H_horizontal_boundaries(z,RaC,RaT,k,zI)
   implicit none
   
   !!input
-  real*8,intent(in) :: z
-  real*8,intent(in) :: RaC,RaT
-  real*8,intent(in) :: k,zI
+  real(dp),intent(in) :: z
+  real(dp),intent(in) :: RaC,RaT
+  real(dp),intent(in) :: k,zI
   
   !!internal variables
-  real*8 :: t1,t2,t3,t4,t5
+  real(dp) :: t1,t2,t3,t4,t5
   
   t1=z-zI
   t2=k*t1
-  t3=exp(2.d0*t2)
+  t3=exp(2._dp*t2)
   t4=t3*t3
-  t5=t3+1.d0
+  t5=t3+1._dp
   
-  H_horizontal_boundaries=4.d0*(RaC*k**2*t3/t5**2 &
-  &- 2.d0*RaC*k**2*t4/t5**3)/RaT
+  H_horizontal_boundaries=4._dp*(RaC*k**2*t3/t5**2 &
+  &- 2._dp*RaC*k**2*t4/t5**3)/RaT
  end function H_horizontal_boundaries
  
  subroutine compute_H_sidewalls(x,z,t,lambda,k,zI,RaT,RaC,H)
@@ -114,18 +114,18 @@ contains
   implicit none
   
   !!inputs
-  real*8,intent(in) :: x,z,t,lambda,k,zI,RaT,RaC
+  real(dp),intent(in) :: x,z,t,lambda,k,zI,RaT,RaC
   
   !!output
-  real*8,intent(out) :: H
+  real(dp),intent(out) :: H
   
   !!internal variables
-  real*8, parameter :: pii=3.1415926535897932d0
-  real*8 :: lam
-  real*8 :: H_ge,H_lt
-  real*8 :: Q,bigZ0
-  real*8 :: t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20
-  real*8 :: t21,t22,t23,t24,t25,t26,t27,t28,t29,t30,t31,t32,t33
+  real(dp), parameter :: pii=3.1415926535897932_dp
+  real(dp) :: lam
+  real(dp) :: H_ge,H_lt
+  real(dp) :: Q,bigZ0
+  real(dp) :: t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20
+  real(dp) :: t21,t22,t23,t24,t25,t26,t27,t28,t29,t30,t31,t32,t33
   
   lam=lambda
   
@@ -150,9 +150,9 @@ contains
   
   t25=-pii*t12*t18/lam + t1
   t3=exp(t25)
-  t4=1.d0/t3
+  t4=1._dp/t3
   
-  t24=zI - arccot(-0.5d0*t4 + 0.5d0*t3)/pii
+  t24=zI - arccot(-0.5_dp*t4 + 0.5_dp*t3)/pii
   t22=k*t24
   t23=k*(t24 - 1)
   
@@ -172,10 +172,9 @@ contains
   
   Q=t25
   
-  bigZ0=-(exp(-Q)-exp(Q))/2.d0
-  !write(*,*) "CHS z,bigZ0=",z,bigZ0
+  bigZ0=-(exp(-Q)-exp(Q))/2._dp
   
-  if (bigZ0.ge.0.d0) then
+  if (bigZ0.ge.0._dp) then
    H_ge=(t21*pii**4*t11*t12*t17/lam**3 - RaC + RaT + 4*RaC*k*(t28*t4/(t2) + t28*t3/(t2))*t5/(t33*pii*t31**2))*pii*t12*t17*t13/(RaT*&
        &lam) - (t21*pii**5*t12*t17*t13/lam**3 + 8*RaC*k*(t28*t4/(t2) + t28*t3/(t2))**2*(t4 - t3)*t5/(t33**2*pii*t31**2) - 4*RaC*k*(&
        &2*t28**2*t4/(t2)**2 - t29*t4/(t2) - t29*t3/(t2))*t5/(t33*pii*t31**2) - 16*RaC*k**2*(t28*t4/(t2) + t28*t3/(t2))**2*t5/(t33**&
@@ -185,7 +184,7 @@ contains
        &/(t33**2*pii**2*t31**3))/RaT - (t21*pii**3*t12*t13*t19/lam**3 + 4*(pii*t12*t4*t17/lam + pii*t12*t3*t17/lam)*RaC*k*t5/(t33*p&
        &ii*t31**2))/RaT
    H=H_ge
-  else if (bigZ0.lt.0.d0) then
+  else if (bigZ0.lt.0._dp) then
    H_lt=(t21*pii**4*t11*t12*t17/lam**3 - RaC + RaT + 4*RaC*k*(t28*t4/(t2) + t28*t3/(t2))*t6/(t33*pii*t32**2))*pii*t12*t17*t13/(RaT*&
        &lam) - (t21*pii**5*t12*t17*t13/lam**3 + 8*RaC*k*(t28*t4/(t2) + t28*t3/(t2))**2*(t4 - t3)*t6/(t33**2*pii*t32**2) - 4*RaC*k*(&
        &2*t28**2*t4/(t2)**2 - t29*t4/(t2) - t29*t3/(t2))*t6/(t33*pii*t32**2) - 16*RaC*k**2*(t28*t4/(t2) + t28*t3/(t2))**2*t6/(t33**&
@@ -211,21 +210,21 @@ contains
   implicit none
   
   !!inputs
-  real*8,intent(in) :: x,z,t,lambda,k,zI,RaT,RaC
+  real(dp),intent(in) :: x,z,t,lambda,k,zI,RaT,RaC
   
   !!output
-  complex*16,intent(out) :: H
+  complex(dp),intent(out) :: H
   
   !!internal functions
-  complex*16 :: t1,t2,t3,t5,t8,t11,t12,t13,t14,t15,t16,t17,t21,t22,t23,t24,t25,t26,t28,t29,t31,t33,t34,t35,t37,t38,t39,t44,t45,t46
-  complex*16 :: t47,t52,t54,t55,t56,t57,t58,t59,t61,t66,t68,t69,t71,t72,t73,t78,t79,t80,t82,t83,t84,t85,t86,t87,t88,t89,t90,t92,t94
-  complex*16 :: t95,t96,t101,t102,t103,t104,t105,t106,t107,t108,t111,t112,t113,t116,t120,t121,t123,t124,t126,t127,t129,t130,t131
-  complex*16 :: t132,t133,t134,t135,t137,t139,t140,t141,t143,t144,t146,t147,t150,t159,t166,t167,t168,t169,t172,t174,t177,t178,t180
-  complex*16 :: t181,t184,t194,t198,t203,t204,t205,t206,t207,t208,t209,t210,t214,t215,t218,t219,t220,t226,t230,t235,t237,t238,t239
-  complex*16 :: t244,t245,t246,t252,t254,t262,t264,t270,t271,t282,t283,t287,t289,t295,t298,t300,t301,t302,t308,t313,t315,t319,t333
-  complex*16 :: t341,t346,t355,t357,t365,t369,t374,t378,t382,t386,t393,t399,t404,t407,t408,t410,t415,t417,t419,t420,t431,t436,t437
-  complex*16 :: t452,t459,t461,t470,t480,t482,t484,t488,t489,t497,t498,t505,t506,t510,t513,t516,t517,t526,t527,t531,t534,t536,t547
-  complex*16 :: t554,t562,t590,t597,t617,t619,t652
+  complex(dp) :: t1,t2,t3,t5,t8,t11,t12,t13,t14,t15,t16,t17,t21,t22,t23,t24,t25,t26,t28,t29,t31,t33,t34,t35,t37,t38,t39,t44,t45,t46
+  complex(dp) :: t47,t52,t54,t55,t56,t57,t58,t59,t61,t66,t68,t69,t71,t72,t73,t78,t79,t80,t82,t83,t84,t85,t86,t87,t88,t89,t90,t92,t94
+  complex(dp) :: t95,t96,t101,t102,t103,t104,t105,t106,t107,t108,t111,t112,t113,t116,t120,t121,t123,t124,t126,t127,t129,t130,t131
+  complex(dp) :: t132,t133,t134,t135,t137,t139,t140,t141,t143,t144,t146,t147,t150,t159,t166,t167,t168,t169,t172,t174,t177,t178,t180
+  complex(dp) :: t181,t184,t194,t198,t203,t204,t205,t206,t207,t208,t209,t210,t214,t215,t218,t219,t220,t226,t230,t235,t237,t238,t239
+  complex(dp) :: t244,t245,t246,t252,t254,t262,t264,t270,t271,t282,t283,t287,t289,t295,t298,t300,t301,t302,t308,t313,t315,t319,t333
+  complex(dp) :: t341,t346,t355,t357,t365,t369,t374,t378,t382,t386,t393,t399,t404,t407,t408,t410,t415,t417,t419,t420,t431,t436,t437
+  complex(dp) :: t452,t459,t461,t470,t480,t482,t484,t488,t489,t497,t498,t505,t506,t510,t513,t516,t517,t526,t527,t531,t534,t536,t547
+  complex(dp) :: t554,t562,t590,t597,t617,t619,t652
   
         t1 = (0.31415926535897932D1 ** 2)
         t2 = 0.31415926535897932D1 * t1
@@ -496,21 +495,21 @@ contains
   implicit none
   
   !!inputs
-  real*8,intent(in) :: x,z,t,lambda,k,zI,RaT,RaC
+  real(dp),intent(in) :: x,z,t,lambda,k,zI,RaT,RaC
   
   !!output
-  complex*16,intent(out) :: H
+  complex(dp),intent(out) :: H
   
   !!internal functions
-  complex*16 :: t1,t2,t3,t5,t8,t11,t12,t13,t14,t15,t16,t17,t21,t23,t24,t25,t26,t27,t28,t29,t31,t32,t34,t35,t37,t38,t39,t41,t42,t43
-  complex*16 :: t48,t49,t50,t51,t56,t58,t59,t60,t61,t62,t63,t65,t70,t72,t73,t75,t76,t77,t83,t84,t85,t87,t88,t89,t90,t91,t92,t93,t94
-  complex*16 :: t95,t96,t98,t100,t101,t102,t107,t108,t109,t110,t111,t112,t113,t114,t117,t118,t119,t122,t126,t127,t129,t130,t132,t133
-  complex*16 :: t135,t136,t137,t138,t139,t140,t141,t143,t145,t146,t147,t149,t150,t152,t153,t156,t165,t172,t173,t174,t175,t176,t179
-  complex*16 :: t182,t185,t186,t188,t189,t192,t202,t206,t211,t212,t213,t214,t215,t216,t217,t218,t222,t223,t226,t227,t228,t234,t238
-  complex*16 :: t243,t245,t246,t247,t252,t253,t254,t260,t262,t270,t272,t278,t279,t290,t291,t295,t297,t303,t306,t308,t309,t310,t316
-  complex*16 :: t321,t323,t327,t341,t348,t361,t363,t371,t375,t380,t384,t388,t392,t399,t405,t410,t413,t414,t416,t421,t423,t425,t426
-  complex*16 :: t437,t442,t443,t458,t465,t467,t476,t486,t488,t490,t494,t495,t503,t504,t511,t512,t516,t519,t522,t523,t532,t533,t537
-  complex*16 :: t540,t542,t553,t560,t568,t596,t603,t623,t625,t658
+  complex(dp) :: t1,t2,t3,t5,t8,t11,t12,t13,t14,t15,t16,t17,t21,t23,t24,t25,t26,t27,t28,t29,t31,t32,t34,t35,t37,t38,t39,t41,t42,t43
+  complex(dp) :: t48,t49,t50,t51,t56,t58,t59,t60,t61,t62,t63,t65,t70,t72,t73,t75,t76,t77,t83,t84,t85,t87,t88,t89,t90,t91,t92,t93,t94
+  complex(dp) :: t95,t96,t98,t100,t101,t102,t107,t108,t109,t110,t111,t112,t113,t114,t117,t118,t119,t122,t126,t127,t129,t130,t132,t133
+  complex(dp) :: t135,t136,t137,t138,t139,t140,t141,t143,t145,t146,t147,t149,t150,t152,t153,t156,t165,t172,t173,t174,t175,t176,t179
+  complex(dp) :: t182,t185,t186,t188,t189,t192,t202,t206,t211,t212,t213,t214,t215,t216,t217,t218,t222,t223,t226,t227,t228,t234,t238
+  complex(dp) :: t243,t245,t246,t247,t252,t253,t254,t260,t262,t270,t272,t278,t279,t290,t291,t295,t297,t303,t306,t308,t309,t310,t316
+  complex(dp) :: t321,t323,t327,t341,t348,t361,t363,t371,t375,t380,t384,t388,t392,t399,t405,t410,t413,t414,t416,t421,t423,t425,t426
+  complex(dp) :: t437,t442,t443,t458,t465,t467,t476,t486,t488,t490,t494,t495,t503,t504,t511,t512,t516,t519,t522,t523,t532,t533,t537
+  complex(dp) :: t540,t542,t553,t560,t568,t596,t603,t623,t625,t658
   
         t1 = (0.31415926535897932D1 ** 2)
         t2 = 0.31415926535897932D1 * t1
@@ -785,21 +784,21 @@ contains
   implicit none
   
   !!inputs
-  real*8,intent(in) :: x,z,t,lambda,k,zI,RaT,RaC
+  real(dp),intent(in) :: x,z,t,lambda,k,zI,RaT,RaC
   
   !!output
-  complex*16,intent(out) :: H
+  complex(dp),intent(out) :: H
   
   !!internal functions
-  complex*16 :: t1,t2,t3,t5,t8,t11,t12,t13,t14,t15
-  complex*16 :: t16,t17,t21,t22,t23,t24,t25,t26,t28,t29,t31,t32,t34,t35,t36,t38,t39,t40,t45,t46,t47,t48,t53,t55,t56,t57,t58,t59,t60
-  complex*16 :: t62,t67,t69,t70,t72,t73,t74,t79,t80,t81,t83,t84,t85,t86,t87,t88,t89,t90,t91,t93,t95,t96,t97,t102,t103,t104,t105
-  complex*16 :: t106,t107,t108,t109,t112,t113,t114,t117,t121,t122,t124,t125,t127,t128,t130,t131,t132,t133,t134,t135,t136,t138,t140
-  complex*16 :: t141,t142,t144,t145,t147,t148,t151,t160,t167,t168,t169,t170,t173,t176,t179,t180,t182,t183,t186,t196,t200,t205,t206
-  complex*16 :: t207,t208,t209,t210,t211,t212,t216,t217,t220,t221,t222,t228,t232,t237,t239,t240,t241,t246,t247,t248,t254,t256,t264
-  complex*16 :: t266,t272,t273,t284,t285,t289,t291,t297,t300,t302,t303,t304,t310,t315,t317,t321,t335,t342,t355,t357,t365,t369,t374
-  complex*16 :: t378,t382,t386,t393,t399,t404,t407,t408,t410,t415,t417,t419,t420,t431,t436,t437,t452,t459,t461,t470,t480,t482,t484
-  complex*16 :: t488,t489,t497,t498,t505,t506,t510,t513,t516,t517,t526,t527,t531,t534,t536,t547,t554,t562,t590,t597,t617,t619,t652
+  complex(dp) :: t1,t2,t3,t5,t8,t11,t12,t13,t14,t15
+  complex(dp) :: t16,t17,t21,t22,t23,t24,t25,t26,t28,t29,t31,t32,t34,t35,t36,t38,t39,t40,t45,t46,t47,t48,t53,t55,t56,t57,t58,t59,t60
+  complex(dp) :: t62,t67,t69,t70,t72,t73,t74,t79,t80,t81,t83,t84,t85,t86,t87,t88,t89,t90,t91,t93,t95,t96,t97,t102,t103,t104,t105
+  complex(dp) :: t106,t107,t108,t109,t112,t113,t114,t117,t121,t122,t124,t125,t127,t128,t130,t131,t132,t133,t134,t135,t136,t138,t140
+  complex(dp) :: t141,t142,t144,t145,t147,t148,t151,t160,t167,t168,t169,t170,t173,t176,t179,t180,t182,t183,t186,t196,t200,t205,t206
+  complex(dp) :: t207,t208,t209,t210,t211,t212,t216,t217,t220,t221,t222,t228,t232,t237,t239,t240,t241,t246,t247,t248,t254,t256,t264
+  complex(dp) :: t266,t272,t273,t284,t285,t289,t291,t297,t300,t302,t303,t304,t310,t315,t317,t321,t335,t342,t355,t357,t365,t369,t374
+  complex(dp) :: t378,t382,t386,t393,t399,t404,t407,t408,t410,t415,t417,t419,t420,t431,t436,t437,t452,t459,t461,t470,t480,t482,t484
+  complex(dp) :: t488,t489,t497,t498,t505,t506,t510,t513,t516,t517,t526,t527,t531,t534,t536,t547,t554,t562,t590,t597,t617,t619,t652
   
         t1 = (0.31415926535897932D1 ** 2)
         t2 = 0.31415926535897932D1 * t1
