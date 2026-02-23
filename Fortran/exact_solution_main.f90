@@ -16,14 +16,14 @@ program exact_solution
  !!Numerical Resolution Variables
  integer(isp) :: nx,nz    !!mesh size
  integer(isp) :: nt       !!time series data points
- real(dp) :: t1,t2       !!initial and final times for time series data
+ real(dp)     :: t1,t2    !!initial and final times for time series data
  
  !!Arrays
  real(dp), allocatable :: C_array(:,:),T_array(:,:),H_array(:,:) !!arrays for C, T, and H fields
  
  !!Internal Variables
- character(256) :: fname   !!output file name
- real(dp) :: tstart,tfinish !!compute time variables
+ character(256) :: fname          !!output file name
+ real(dp)       :: tstart,tfinish !!compute time variables
  
  !!!!Input Parameters -- note that functions in input_functions.f90 must also be specified
  lambda=1.0_dp; k=35._dp; zI=0.5_dp; RaT=1.e5_dp; RaC=0.5e5_dp !!case 1 -- physical parameters
