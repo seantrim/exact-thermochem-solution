@@ -24,7 +24,7 @@ exact_solution_main: exact_solution_main.o exact_solution_routines.o exact_solut
 exact_solution_main.o: exact_solution_main.f90 H_function.mod exact_solution_routines.mod kind_parameters.mod
 	$(FC) -c $(FOPTS) exact_solution_main.f90 
 
-exact_solution_routines.o exact_solution_routines.mod: exact_solution_routines.f90 input_functions.mod elliptic.mod H_helper_routines.mod H_function.mod
+exact_solution_routines.o exact_solution_routines.mod: exact_solution_routines.f90 input_functions.mod elliptic.mod H_helper_routines.mod H_function.mod kind_parameters.mod
 	$(FC) -c $(FOPTS) exact_solution_routines.f90 
 
 H_function.o H_function.mod: H_function.f90 H_helper_routines.mod

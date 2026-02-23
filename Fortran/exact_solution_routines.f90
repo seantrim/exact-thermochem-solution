@@ -1,23 +1,22 @@
 module exact_solution_routines
-
+ use kind_parameters,only: isp,dp
  implicit none
  private
  public :: C,T_func,vRMS,compute_z0,compute_array,create_datafile,compute_entrainment
 
 contains
 
- real*8 function vRMS(lambda,t)
+ real(dp) function vRMS(lambda,t)
   use input_functions,only: f_func
   implicit none
   
   !!input
-  real*8,intent(in) :: lambda !!aspect ratio
-  real*8,intent(in) :: t !!time
+  real(dp),intent(in) :: lambda !!aspect ratio
+  real(dp),intent(in) :: t !!time
   
   !!internal variables
-  real*8, parameter :: pii=3.1415926535897932d0
-  !real*8 :: f_func !!external function f(t) -- time dependence of the stream function
-  vRMS=pii*sqrt(lambda**2+1.d0)/2.d0/lambda*abs(f_func(t))
+  real(dp), parameter :: pii=3.1415926535897932_dp
+  vRMS=pii*sqrt(lambda**2+1._dp)/2._dp/lambda*abs(f_func(t))
  end function vRMS
  
  subroutine compute_entrainment(tmin,tmax,nt,zR,lambda,k,zI,RaT,RaC,nx,nz,fname)
@@ -25,30 +24,30 @@ contains
   implicit none
   
   !!input
-  real*8       ,intent(in) :: tmin,tmax !!lower and upper limit for time
-  integer*4    ,intent(in) :: nt !!number of data points in the time series
-  real*8       ,intent(in) :: zR !!reference z value
-  real*8       ,intent(in) :: lambda !!aspect ratio
-  real*8       ,intent(in) :: k,zI
-  real*8       ,intent(in) :: RaT,RaC !!Rayleigh numbers
-  integer*4    ,intent(in) :: nx,nz !!# of mesh points in the x and z directions
-  character*256,intent(in) :: fname !!file name
+  real(dp)      ,intent(in) :: tmin,tmax !!lower and upper limit for time
+  integer(isp)  ,intent(in) :: nt !!number of data points in the time series
+  real(dp)      ,intent(in) :: zR !!reference z value
+  real(dp)      ,intent(in) :: lambda !!aspect ratio
+  real(dp)      ,intent(in) :: k,zI
+  real(dp)      ,intent(in) :: RaT,RaC !!Rayleigh numbers
+  integer(isp)  ,intent(in) :: nx,nz !!# of mesh points in the x and z directions
+  character(256),intent(in) :: fname !!file name
   
   !!internal variables
-  real*8 :: xmin,xmax,zmin,zmax !!limits of integration
-  real*8 :: C_array(1:nx,1:nz)
-  real*8 :: t,dt
-  real*8 :: integral,entrainment
-  integer*4 :: kt
+  real(dp) :: xmin,xmax,zmin,zmax !!limits of integration
+  real(dp) :: C_array(1:nx,1:nz)
+  real(dp) :: t,dt
+  real(dp) :: integral,entrainment
+  integer(isp) :: kt
   
   open(unit=666,file=fname)
   
-  dt=(tmax-tmin)/real(nt-1,8)
+  dt=(tmax-tmin)/real(nt-1,dp)
   
   do kt=1,nt
-   t=max(dt*real(kt-1,8),0.d0) !!negative t values are not allowed
+   t=max(dt*real(kt-1,dp),0._dp) !!negative t values are not allowed
    call compute_array('C',t,lambda,k,zI,RaT,RaC,nx,nz,C_array)
-   call volume_integral(0.d0,lambda,zR,1.d0,lambda,nx,nz,C_array,integral)
+   call volume_integral(0._dp,lambda,zR,1._dp,lambda,nx,nz,C_array,integral)
    entrainment=integral/lambda/zI
    write(666,'(2(g16.9))') t,entrainment
   end do
@@ -61,31 +60,31 @@ contains
   implicit none
   
   !!input
-  real*8   ,intent(in) :: xmin,xmax,zmin,zmax !!limits of integration
-  real*8   ,intent(in) :: lambda !!aspect ratio
-  integer*4,intent(in) :: nx,nz !!# of mesh points in the x and z directions
-  real*8   ,intent(in) :: array(1:nx,1:nz) !!array containing the data
+  real(dp)    ,intent(in) :: xmin,xmax,zmin,zmax !!limits of integration
+  real(dp)    ,intent(in) :: lambda !!aspect ratio
+  integer(isp),intent(in) :: nx,nz !!# of mesh points in the x and z directions
+  real(dp)    ,intent(in) :: array(1:nx,1:nz) !!array containing the data
   
   !!output
-  real*8,intent(out) :: integral
+  real(dp),intent(out) :: integral
   
   !!internal variables
-  integer*4 :: iint,kint
-  integer*4 :: kint_min,kint_max
-  real*8    :: dz
-  real*8    :: integral_temp(1:nz)
+  integer(isp) :: iint,kint
+  integer(isp) :: kint_min,kint_max
+  real(dp)     :: dz
+  real(dp)     :: integral_temp(1:nz)
   
-  dz=1.d0/real(nz-1,8)
+  dz=1._dp/real(nz-1,dp)
   
-  !integral=0.d0
-  kint_min=nint(zmin/dz,4)+1
-  kint_max=nint(zmax/dz,4)+1
+  !integral=0._dp
+  kint_min=nint(zmin/dz,isp)+1
+  kint_max=nint(zmax/dz,isp)+1
   
   do kint=kint_min,kint_max
    call integral_1D(xmin,xmax,lambda,nx,array(1:nx,kint),integral_temp(kint)) !!create array of integrals over x
   end do
   
-  call integral_1D(zmin,zmax,1.d0,nz,integral_temp,integral)
+  call integral_1D(zmin,zmax,1._dp,nz,integral_temp,integral)
  end subroutine volume_integral
  
  subroutine integral_1D(xmin,xmax,length,nx,array_1D,integral)
@@ -93,25 +92,25 @@ contains
   implicit none
   
   !!input
-  real*8   ,intent(in) :: xmin,xmax !!lower and upper limits of integration
-  real*8   ,intent(in) :: length !!length of spatial axis
-  integer*4,intent(in) :: nx !!# of mesh points
-  real*8   ,intent(in) :: array_1D(1:nx)
+  real(dp)    ,intent(in) :: xmin,xmax !!lower and upper limits of integration
+  real(dp)    ,intent(in) :: length !!length of spatial axis
+  integer(isp),intent(in) :: nx !!# of mesh points
+  real(dp)    ,intent(in) :: array_1D(1:nx)
   
   !!output
-  real*8,intent(out) :: integral
+  real(dp),intent(out) :: integral
   
   !!internal variables
-  integer*4 :: iint,iint_min,iint_max
-  real*8    :: dx
+  integer(isp) :: iint,iint_min,iint_max
+  real(dp)     :: dx
   
-  dx=length/real(nx-1,8)
+  dx=length/real(nx-1,dp)
   
-  integral=0.d0
-  iint_min=nint(xmin/dx,4)+1
-  iint_max=nint(xmax/dx,4)+1
+  integral=0._dp
+  iint_min=nint(xmin/dx,isp)+1
+  iint_max=nint(xmax/dx,isp)+1
   do iint=iint_min,iint_max-1
-   integral=integral+dx*(array_1D(iint)+array_1D(iint+1))/2.d0
+   integral=integral+dx*(array_1D(iint)+array_1D(iint+1))/2._dp
   end do
  end subroutine integral_1D
  
@@ -121,24 +120,24 @@ contains
   implicit none
   
   !!input
-  real*8       ,intent(in) :: lambda !!aspect ratio
-  integer*4    ,intent(in) :: nx,nz !!# of mesh points in the x and z directions
-  real*8       ,intent(in) :: array(1:nx,1:nz) !!array containing the data
-  character*256,intent(in) :: fname !!output file name
+  real(dp)       ,intent(in) :: lambda !!aspect ratio
+  integer(isp)    ,intent(in) :: nx,nz !!# of mesh points in the x and z directions
+  real(dp)       ,intent(in) :: array(1:nx,1:nz) !!array containing the data
+  character(256),intent(in) :: fname !!output file name
   
   !!internal variables
-  integer*4 :: iint,kint
-  real*8    :: dx,dz
-  real*8    :: x,z
+  integer(isp) :: iint,kint
+  real(dp)    :: dx,dz
+  real(dp)    :: x,z
   
   open(unit=666,file=fname)
   
-  dx=lambda/real(nx-1,8); dz=1.d0/real(nz-1,8)
+  dx=lambda/real(nx-1,dp); dz=1._dp/real(nz-1,dp)
   
   do kint=1,nz
-   z=max(min(dz*real(kint-1,8),1.d0),0.d0)
+   z=max(min(dz*real(kint-1,dp),1._dp),0._dp)
    do iint=1,nx
-    x=max(min(dx*real(iint-1,8),lambda),0.d0)
+    x=max(min(dx*real(iint-1,dp),lambda),0._dp)
     write(666,'(3(g17.9))') x,z,array(iint,kint)
    end do
   end do
@@ -152,54 +151,54 @@ contains
   implicit none
   
   !!input
-  character*1,intent(in) :: option !!specify function to be computed -- valid options are: "C", "T", "D", and "H".
-  real*8     ,intent(in) :: t !!time
-  real*8     ,intent(in) :: lambda,k,zI !!aspect ratio, sharpness parameter, and z value of interface at t=0
-  real*8     ,intent(in) :: RaT,RaC !!Rayleigh numbers
-  integer*4  ,intent(in) :: nx,nz !!# of mesh points in the x and z directions
+  character(1),intent(in) :: option !!specify function to be computed -- valid options are: "C", "T", "D", and "H".
+  real(dp)     ,intent(in) :: t !!time
+  real(dp)     ,intent(in) :: lambda,k,zI !!aspect ratio, sharpness parameter, and z value of interface at t=0
+  real(dp)     ,intent(in) :: RaT,RaC !!Rayleigh numbers
+  integer(isp)  ,intent(in) :: nx,nz !!# of mesh points in the x and z directions
   
   !!output
-  real*8,intent(out) :: array(1:nx,1:nz)
+  real(dp),intent(out) :: array(1:nx,1:nz)
   
   !!internal variables
-  integer*4, parameter :: n_ghost=10
-  integer*4 :: iint,kint
-  real*8 :: dx,dz
-  real*8 :: x,z
-  real*8 :: H_func
-  complex*16 :: H
+  integer(isp), parameter :: n_ghost=10
+  integer(isp) :: iint,kint
+  real(dp) :: dx,dz
+  real(dp) :: x,z
+  real(dp) :: H_func
+  complex(dp) :: H
   
-  dx=lambda/real(nx-1,8); dz=1.d0/real(nz-1,8)
+  dx=lambda/real(nx-1,dp); dz=1._dp/real(nz-1,dp)
   
   if (option.eq.'C') then
    do kint=1,nz
-    z=max(min(dz*real(kint-1,8),1.d0),0.d0)
+    z=max(min(dz*real(kint-1,dp),1._dp),0._dp)
     do iint=1,nx
-     x=max(min(dx*real(iint-1,8),lambda),0.d0)
+     x=max(min(dx*real(iint-1,dp),lambda),0._dp)
      array(iint,kint)=C(x,z,t,lambda,k,zI)
     end do
    end do
   else if (option.eq.'T') then
    do kint=1,nz
-    z=max(min(dz*real(kint-1,8),1.d0),0.d0)
+    z=max(min(dz*real(kint-1,dp),1._dp),0._dp)
     do iint=1,nx
-     x=max(min(dx*real(iint-1,8),lambda),0.d0)
+     x=max(min(dx*real(iint-1,dp),lambda),0._dp)
      array(iint,kint)=T_func(x,z,t,lambda,k,zI,RaT,RaC)
     end do
    end do
   else if (option.eq.'D') then
    do kint=1,nz
-    z=max(min(dz*real(kint-1,8),1.d0),0.d0)
+    z=max(min(dz*real(kint-1,dp),1._dp),0._dp)
     do iint=1,nx
-     x=max(min(dx*real(iint-1,8),lambda),0.d0)
+     x=max(min(dx*real(iint-1,dp),lambda),0._dp)
      array(iint,kint)=D(x,z,lambda)
     end do
    end do
   else if (option.eq.'H') then
    do kint=1,nz
-    z=max(min(dz*real(kint-1,8),1.d0),0.d0)
+    z=max(min(dz*real(kint-1,dp),1._dp),0._dp)
     do iint=1,nx
-     x=max(min(dx*real(iint-1,8),lambda),0.d0)
+     x=max(min(dx*real(iint-1,dp),lambda),0._dp)
      call compute_H_func(x,z,t,lambda,k,zI,RaT,RaC,H_func)
      array(iint,kint)=H_func
     end do
@@ -209,40 +208,40 @@ contains
   end if
  end subroutine compute_array
  
- real*8 function T_func(x,z,t,lambda,k,zI,RaT,RaC)
+ real(dp) function T_func(x,z,t,lambda,k,zI,RaT,RaC)
   !!temperature function
   !!assumes x belongs to (-lambda/2,3/2*lambda) and z belongs to (-1,2)
   use input_functions,only: f_func
   implicit none
   
   !!inputs
-  real*8,intent(in) :: x,z,t  !!position and time
-  real*8,intent(in) :: lambda !!aspect ratio
-  real*8,intent(in) :: k,zI   !!sharpness parameter and initial layer height
-  real*8,intent(in) :: RaT,RaC !!Rayleigh numbers
+  real(dp),intent(in) :: x,z,t  !!position and time
+  real(dp),intent(in) :: lambda !!aspect ratio
+  real(dp),intent(in) :: k,zI   !!sharpness parameter and initial layer height
+  real(dp),intent(in) :: RaT,RaC !!Rayleigh numbers
   
   !!internal variables
-  real*8, parameter :: pii=3.1415926535897932d0
+  real(dp), parameter :: pii=3.1415926535897932_dp
   
-  T_func=(-(pii**3*(lambda**2+1.d0)**2/lambda**3)*cos(pii*x/lambda)*sin(pii*z)*f_func(t)+RaC*C(x,z,t,lambda,k,zI)+&
-  &(RaT-RaC)*(1.d0-z))/RaT
+  T_func=(-(pii**3*(lambda**2+1._dp)**2/lambda**3)*cos(pii*x/lambda)*sin(pii*z)*f_func(t)+RaC*C(x,z,t,lambda,k,zI)+&
+  &(RaT-RaC)*(1._dp-z))/RaT
  end function T_func
  
- real*8 function C(x,z,t,lambda,k,zI)
+ real(dp) function C(x,z,t,lambda,k,zI)
   !!compute composition
   !!assumes x belongs to (-lambda/2,3/2*lambda) and z belongs to (-1,2)
   implicit none
   
   !!inputs
-  real*8,intent(in) :: x,z,t  !!position and time
-  real*8,intent(in) :: lambda !!aspect ratio
-  real*8,intent(in) :: k,zI   !!sharpness parameter and initial layer height
+  real(dp),intent(in) :: x,z,t  !!position and time
+  real(dp),intent(in) :: lambda !!aspect ratio
+  real(dp),intent(in) :: k,zI   !!sharpness parameter and initial layer height
   
   !!internal variables
-  real*8 :: z0
+  real(dp) :: z0
   
   call compute_z0(x,z,t,lambda,z0)
-  C=1.d0/(1.d0+exp(-2.d0*k*(zI-z0)))
+  C=1._dp/(1._dp+exp(-2._dp*k*(zI-z0)))
  end function C
  
  subroutine compute_z0(x,z,t,lambda,z0)
@@ -254,66 +253,66 @@ contains
   implicit none
   
   !!inputs
-  real*8,intent(in) :: x,z,t  !!position and time
-  real*8,intent(in) :: lambda !!aspect ratio
+  real(dp),intent(in) :: x,z,t  !!position and time
+  real(dp),intent(in) :: lambda !!aspect ratio
   
   !!output
-  real*8,intent(out) :: z0
+  real(dp),intent(out) :: z0
   
   !!internal variables
-  real*8, parameter :: pii=3.1415926535897932d0
-  real*8 :: Q,arg,eQ,bigZ0 !!variables for sidewalls
-  real*8 :: phi,m !!elliptic amplitude and parameter
-  real*8 :: x_,z_
-  complex*16 :: F,E !!elliptic integrals of the first and second kinds
-  complex*16 :: u   !!argument for the Jacobi elliptic functions
-  complex*16 :: sn,cn,dn !!Jacobi elliptic function values
+  real(dp), parameter :: pii=3.1415926535897932_dp
+  real(dp) :: Q,arg,eQ,bigZ0 !!variables for sidewalls
+  real(dp) :: phi,m !!elliptic amplitude and parameter
+  real(dp) :: x_,z_
+  complex(dp) :: F,E !!elliptic integrals of the first and second kinds
+  complex(dp) :: u   !!argument for the Jacobi elliptic functions
+  complex(dp) :: sn,cn,dn !!Jacobi elliptic function values
   
-  if ((z.eq.0.d0).or.(z.eq.1.d0).or.((x.eq.(lambda/2.d0)).and.(z.eq.0.5d0))) then
+  if ((z.eq.0._dp).or.(z.eq.1._dp).or.((x.eq.(lambda/2._dp)).and.(z.eq.0.5_dp))) then
    z0=z
-  else if ((x.eq.0.d0).or.(x.eq.lambda)) then
+  else if ((x.eq.0._dp).or.(x.eq.lambda)) then
    arg=pii*z
-   Q=log(abs(1.d0/sin(arg)+1.d0/tan(arg)))-pii/lambda*S(x,lambda)*f_integral(t)
+   Q=log(abs(1._dp/sin(arg)+1._dp/tan(arg)))-pii/lambda*S(x,lambda)*f_integral(t)
    eQ=exp(Q)
-   bigZ0=(eQ-1.d0/eQ)/2.d0
-   if (bigZ0.ge.0.d0) then
+   bigZ0=(eQ-1._dp/eQ)/2._dp
+   if (bigZ0.ge.0._dp) then
     z0=arccot(bigZ0)/pii
    else
-    z0=1.d0+arccot(bigZ0)/pii
+    z0=1._dp+arccot(bigZ0)/pii
    end if
   else
-   if (x.lt.0.d0) then !!beyond left sidewall
+   if (x.lt.0._dp) then !!beyond left sidewall
     x_=-x
    else if (x.gt.lambda) then !!beyond right sidewall
-    x_=2.d0*lambda-x
+    x_=2._dp*lambda-x
    else !!domain interior
     x_=x
    end if
-   if (z.lt.0.d0) then !!beyond bottom
+   if (z.lt.0._dp) then !!beyond bottom
     z_=-z
-   else if (z.gt.1.d0) then !!beyond top
-    z_=2.d0-z  
+   else if (z.gt.1._dp) then !!beyond top
+    z_=2._dp-z  
    else !!domain interior
     z_=z
    end if
-   phi=pii*z_; m=1.d0/D(x_,z_,lambda)**2.d0
+   phi=pii*z_; m=1._dp/D(x_,z_,lambda)**2._dp
    call incomplete_elliptic_integrals(phi,m,F,E)
    u=F
-   if (t.ne.0.d0) u%IM=u%IM-S(x_,lambda)*(pii**2.d0*D(x_,z_,lambda)/lambda)*f_integral(t)
+   if (t.ne.0._dp) u%IM=u%IM-S(x_,lambda)*(pii**2._dp*D(x_,z_,lambda)/lambda)*f_integral(t)
    call Jacobi_elliptic_functions(u,m,sn,cn,dn)
-   if (abs(cn%RE).gt.1.d0) then
+   if (abs(cn%RE).gt.1._dp) then
     write(*,*) "compute_z0: large cn magnitude detected -- cn=",cn%RE
     stop
    end if
    z0=acos(cn%RE)/pii
   
   
-  ! phi=pii*z; m=1.d0/D(x,z,lambda)**2.d0
+  ! phi=pii*z; m=1._dp/D(x,z,lambda)**2._dp
   ! call incomplete_elliptic_integrals(phi,m,F,E)
   ! u=F
-  ! if (t.ne.0.d0) u%IM=u%IM-S(x,lambda)*(pii**2.d0*D(x,z,lambda)/lambda)*f_integral(t)
+  ! if (t.ne.0._dp) u%IM=u%IM-S(x,lambda)*(pii**2._dp*D(x,z,lambda)/lambda)*f_integral(t)
   ! call Jacobi_elliptic_functions(u,m,sn,cn,dn)
-  ! if (abs(cn%RE).gt.1.d0) then
+  ! if (abs(cn%RE).gt.1._dp) then
   !  write(*,*) "compute_z0: large cn magnitude detected -- cn=",cn%RE
   !  stop
   ! end if
@@ -321,29 +320,29 @@ contains
   end if
  end subroutine compute_z0
  
- real*8 function D(x,z,lambda)
+ real(dp) function D(x,z,lambda)
   !!characteristic orbital value
   implicit none
   
   !!inputs
-  real*8,intent(in) :: x,z,lambda
+  real(dp),intent(in) :: x,z,lambda
   
   !!internal variables
-  real*8, parameter :: pii=3.1415926535897932d0
+  real(dp), parameter :: pii=3.1415926535897932_dp
   
   D=abs(sin(pii*x/lambda)*sin(pii*z))
  end function D
   
- real*8 function S(x,lambda)
+ real(dp) function S(x,lambda)
   !!transformed unit step function
   !!assumes -lambda/2 <= x <= 3/2*lambda
   implicit none
-  real*8,intent(in) :: x,lambda
+  real(dp),intent(in) :: x,lambda
 
-  if (x.le.lambda/2.d0) then
-   S=1.d0
+  if (x.le.lambda/2._dp) then
+   S=1._dp
   else
-   S=-1.d0
+   S=-1._dp
   end if
  end function S
 
