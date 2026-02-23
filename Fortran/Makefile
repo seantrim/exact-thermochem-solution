@@ -21,7 +21,7 @@ gfortran_debug:
 exact_solution_main: exact_solution_main.o exact_solution_routines.o exact_solution_routines.mod H_function.o H_function.mod H_helper_routines.o H_helper_routines.mod input_functions.o input_functions.mod elliptic.o elliptic.mod xgscd_routines.o xgscd_routines.mod xelbdj2_all_routines.o xelbdj2_all_routines.mod kind_parameters.o kind_parameters.mod
 	$(FC) -o exact_solution_code $(FOPTS) exact_solution_main.f90 exact_solution_routines.f90 H_function.f90 H_helper_routines.f90 input_functions.f90 $(mod_dir)/elliptic.f90 $(mod_dir)/xgscd_routines.f90 $(mod_dir)/xelbdj2_all_routines.f90 $(mod_dir)/kind_parameters.f90
 
-exact_solution_main.o: exact_solution_main.f90 H_function.mod exact_solution_routines.mod
+exact_solution_main.o: exact_solution_main.f90 H_function.mod exact_solution_routines.mod kind_parameters.mod
 	$(FC) -c $(FOPTS) exact_solution_main.f90 
 
 exact_solution_routines.o exact_solution_routines.mod: exact_solution_routines.f90 input_functions.mod elliptic.mod H_helper_routines.mod H_function.mod
