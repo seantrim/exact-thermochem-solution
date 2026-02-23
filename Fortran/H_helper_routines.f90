@@ -89,7 +89,7 @@ contains
     complex(dp),intent(out) :: JacobiZeta
     
     !!internal variables
-    real(dp), parameter :: tol_IM=1.d-3 !!tolerance for cn%IM size
+    real(dp), parameter :: tol_IM=1.e-3_dp !!tolerance for cn%IM size
     real(dp)    :: m !!elliptic parameter
     real(dp)    :: phi !!Jacobi amplitude
     complex(dp) :: Fc,Ec,F,E !!elliptic integral values
