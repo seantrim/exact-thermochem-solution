@@ -33,7 +33,7 @@ H_function.o H_function.mod: H_function.f90 H_helper_routines.mod
 H_helper_routines.o H_helper_routines.mod: H_helper_routines.f90 input_functions.mod elliptic.mod
 	$(FC) -c $(FOPTS) H_helper_routines.f90 
 
-input_functions.o input_functions.mod: input_functions.f90
+input_functions.o input_functions.mod: input_functions.f90 kind_parameters.mod
 	$(FC) -c $(FOPTS) input_functions.f90 
 
 elliptic.o elliptic.mod: $(mod_dir)/elliptic.f90 kind_parameters.mod xelbdj2_all_routines.mod xgscd_routines.mod
