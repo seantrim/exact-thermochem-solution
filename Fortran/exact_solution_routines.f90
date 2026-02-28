@@ -34,7 +34,6 @@ contains
   character(256),intent(in) :: fname !!file name
   
   !!internal variables
-  real(dp) :: xmin,xmax,zmin,zmax !!limits of integration
   real(dp) :: C_array(1:nx,1:nz)
   real(dp) :: t,dt
   real(dp) :: integral,entrainment
@@ -69,7 +68,7 @@ contains
   real(dp),intent(out) :: integral
   
   !!internal variables
-  integer(isp) :: iint,kint
+  integer(isp) :: kint
   integer(isp) :: kint_min,kint_max
   real(dp)     :: dz
   real(dp)     :: integral_temp(1:nz)
@@ -166,7 +165,6 @@ contains
   real(dp) :: dx,dz
   real(dp) :: x,z
   real(dp) :: H_func
-  complex(dp) :: H
   
   dx=lambda/real(nx-1,dp); dz=1._dp/real(nz-1,dp)
   
