@@ -64,12 +64,6 @@ contains
   complex(dp),intent(in) :: k !!elliptic modulus
   complex(dp),intent(in) :: u !!argument (equivalent to F(phi|m))
   
-  !!internal variables
-  real(dp) :: m !!elliptic parameter
-  real(dp) :: phi !!Jacobi amplitude
-  complex(dp) :: Fc,Ec,F,E !!elliptic integral values
-  complex(dp) :: sn,cn,dn !!Jacobi elliptic function values
-  
   call compute_JacobiZeta(u,k,JacobiZeta)
 
   contains
