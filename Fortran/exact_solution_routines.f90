@@ -145,7 +145,7 @@ contains
  end subroutine create_datafile
  
  subroutine compute_array(option,t,lambda,k,zI,RaT,RaC,nx,nz,array)
-  !!compute array of composition values for a time t
+  !!compute array of function values for a time t
   use H_function,only: compute_H_func
   implicit none
   
@@ -160,7 +160,6 @@ contains
   real(dp),intent(out) :: array(1:nx,1:nz)
   
   !!internal variables
-  integer(isp), parameter :: n_ghost=10
   integer(isp) :: iint,kint
   real(dp) :: dx,dz
   real(dp) :: x,z

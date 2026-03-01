@@ -205,7 +205,7 @@ contains
   use H_helper_routines,only: Heaviside,Dirac,Dirac_derivative,signum
   use H_helper_routines,only: F,dFdt,d2Fdt2
   use H_helper_routines,only: JacobiSN,JacobiCN,JacobiDN
-  use H_helper_routines,only: InverseJacobiAM,EllipticK,EllipticE,JacobiZeta
+  use H_helper_routines,only: InverseJacobiAM,JacobiZeta!,EllipticK,EllipticE
   use H_helper_routines,only: compute_JacobiSN_CN_DN,compute_EllipticK_EllipticE 
   implicit none
   
@@ -490,7 +490,7 @@ contains
   use H_helper_routines,only: Heaviside,Dirac,Dirac_derivative,signum
   use H_helper_routines,only: F,dFdt,d2Fdt2
   use H_helper_routines,only: JacobiSN,JacobiCN,JacobiDN
-  use H_helper_routines,only: InverseJacobiAM,EllipticK,EllipticE,JacobiZeta
+  use H_helper_routines,only: InverseJacobiAM,JacobiZeta!,EllipticK,EllipticE
   use H_helper_routines,only: compute_JacobiSN_CN_DN,compute_EllipticK_EllipticE 
   implicit none
   
@@ -779,7 +779,7 @@ contains
   use H_helper_routines,only: Heaviside,Dirac,Dirac_derivative,signum
   use H_helper_routines,only: F,dFdt,d2Fdt2
   use H_helper_routines,only: JacobiSN,JacobiCN,JacobiDN
-  use H_helper_routines,only: InverseJacobiAM,EllipticK,EllipticE,JacobiZeta
+  use H_helper_routines,only: InverseJacobiAM,JacobiZeta!,EllipticK,EllipticE
   use H_helper_routines,only: compute_JacobiSN_CN_DN,compute_EllipticK_EllipticE 
   implicit none
   

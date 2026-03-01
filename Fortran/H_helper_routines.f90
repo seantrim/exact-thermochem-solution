@@ -233,15 +233,17 @@ contains
   implicit none
   
   !!input
-  complex(dp),intent(in) :: k !!elliptic modulus
-  complex(dp),intent(in) :: phi !!elliptic amplitude
+  complex(dp),intent(in) :: k   !!elliptic modulus
+  complex(dp),intent(in) :: phi !!Jacobi amplitude
   
   !!internal variables
-  complex(dp) :: F,E
-  real(dp)    :: m !!elliptic parameter
+  complex(dp) :: F,E    !!elliptic integrals
+  real(dp)    :: m      !!elliptic parameter
+  real(dp)    :: phi_in !!input Jacobi amplitude
   
   m=k%RE**2
-  call incomplete_elliptic_integrals(phi%RE,m,F,E)
+  phi_in=phi%RE
+  call incomplete_elliptic_integrals(phi_in,m,F,E)
   InverseJacobiAM=F
  end function InverseJacobiAM
  
