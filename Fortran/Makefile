@@ -1,6 +1,3 @@
-# OG
-# gfortran -flto -O3 exact_solution_main.f90 exact_solution_routines.f90 ellipFor_modules/elliptic.f90 H_helper_routines.f90 ellipFor_modules/kind_parameters.f90 ellipFor_modules/xelbdj2_all_routines.f90 ellipFor_modules/xgscd_routines.f90 H_func.f90 input_functions.f90 -o exact_solution_code ##maximize speed
-
 # define directory containing ellipFor modules
 mod_dir := ellipFor_modules
 
@@ -16,6 +13,20 @@ gfortran_debug: FC = gfortran
 gfortran_debug: FOPTS = -Og -ffpe-trap=invalid,zero,overflow,underflow -ggdb3 -fbounds-check -fbacktrace
 gfortran_debug: exact_solution_main
 gfortran_debug:
+	echo $(FC) $(FOPTS)
+
+# Intel Fortran
+ifx: FC = ifx
+ifx: FOPTS = -ipo -O3 -fp-model strict
+ifx: exact_solution_main
+ifx:
+	echo $(FC) $(FOPTS)
+
+# Intel Fortran
+ifx_debug: FC = ifx
+ifx_debug: FOPTS = -O0 -g -traceback -fpe:0 -check all -fp-model strict 
+ifx_debug: exact_solution_main
+ifx_debug:
 	echo $(FC) $(FOPTS)
 
 exact_solution_main: exact_solution_main.o exact_solution_routines.o exact_solution_routines.mod H_function.o H_function.mod H_helper_routines.o H_helper_routines.mod input_functions.o input_functions.mod elliptic.o elliptic.mod xgscd_routines.o xgscd_routines.mod xelbdj2_all_routines.o xelbdj2_all_routines.mod kind_parameters.o kind_parameters.mod
