@@ -1,6 +1,6 @@
 # Input Options
 FC="ifx"     # Fortran compiler: "gfortran" or "ifx" (may need to run source /opt/intel/oneapi/setvars.sh for access to ifx via Intel oneAPI)
-mode="debug" # build mode: "debug" or "production"
+mode="production" # build mode: "debug" or "production"
 
 # Automated Build Operations Below
 export FC
@@ -12,7 +12,7 @@ if [[ "$mode" == "debug" ]]; then # additional debug options that are not easily
   if [[ "$FC" == "gfortran" ]]; then
     export FFLAGS='-ffpe-trap=invalid,zero,overflow,underflow -fbounds-check -fbacktrace' # floating-point traps and checks for arrays bounds
   elif [[ "$FC" == "ifx" ]]; then
-    export FFLAGS='-fpe:0 -check all' # floating-point traps and checks for arrays bounds and shape violations
+    export FFLAGS='-fpe:0 -check all -fp-model strict' # floating-point traps and checks for arrays bounds and shape violations
   else
     export FFLAGS=''
   fi
@@ -22,7 +22,7 @@ else # apply O3 optimzation to account for meson not applying it at the link sta
     export FFLAGS='-O3'
   elif [[ "$FC" == "ifx" ]]; then
     #export FFLAGS='-O3 -ipo' # apply -ipo option because meson does not apply it automatically with built-in link time optimization option 
-    export FFLAGS='-O3' # neglecting -ipo for now because it is currently not functioning (as of meson 1.7.0 and ifx 2025.3.2 20260112)
+    export FFLAGS='-O3 -fp-model strict' # neglecting -ipo for now because it is currently not functioning (as of meson 1.7.0 and ifx 2025.3.2 20260112)
   else
     export FFLAGS=''
   fi
