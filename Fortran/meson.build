@@ -1,3 +1,2 @@
-project('exact_solution_code', 'fortran', default_options : ['buildtype=plain'])
-add_project_arguments(language : ['fortran'])
+project('exact_solution_code', 'fortran', version : '2.0.0', license : 'GPL-3.0')
 executable('exact_solution_code', files('exact_solution_main.f90', 'exact_solution_routines.f90', 'H_function.f90', 'H_helper_routines.f90', 'input_functions.f90', 'ellipFor_modules/elliptic.f90', 'ellipFor_modules/xelbdj2_all_routines.f90', 'ellipFor_modules/xgscd_routines.f90', 'ellipFor_modules/kind_parameters.f90'))

@@ -1,3 +1,2 @@
 Fortran/*.dat
-Fortran/*.o
-Fortran/*.mod
+Fortran/builddir/
