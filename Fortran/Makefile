@@ -1,3 +1,8 @@
+# Usage:
+#   -- for gfortran: $ make gfortran
+#   -- for ifx     : $ make ifx
+#      -- Note: Intel oneAPI users may have to run the setvars script for access to ifx (e.g., $ source /opt/intel/oneapi/setvars.sh)
+
 # default compiler
 FC := gfortran
 
@@ -15,13 +20,13 @@ gfortran_debug: FOPTS := -Og -ffpe-trap=invalid,zero,overflow,underflow -Wall -f
 gfortran_debug: exact_solution_main
 
 # Intel Fortran
-# Note: Intel oneAPI users may have to run the setvars script for access to ifx (e.g., source /opt/intel/oneapi/setvars.sh)
+# Note: Intel oneAPI users may have to run the setvars script for access to ifx (e.g., $ source /opt/intel/oneapi/setvars.sh)
 ifx: FC := ifx
 ifx: FOPTS := -ipo -O3 -fp-model strict
 ifx: exact_solution_main
 
 # Intel Fortran (Debug)
-# Note: Intel oneAPI users may have to run the setvars script for access to ifx (e.g., source /opt/intel/oneapi/setvars.sh)
+# Note: Intel oneAPI users may have to run the setvars script for access to ifx (e.g., $ source /opt/intel/oneapi/setvars.sh)
 ifx_debug: FC := ifx
 ifx_debug: FOPTS := -O0 -g -traceback -fpe:0 -check all -fp-model strict
 ifx_debug: exact_solution_main
